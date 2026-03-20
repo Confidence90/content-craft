@@ -39,9 +39,9 @@ const Services = () => {
       <section className="bg-hero py-20">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Our Expertise</p>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Notre Expertise</p>
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground mb-4">Services & Solutions</h1>
-            <p className="text-primary-foreground/60 text-lg">End-to-end digital services designed to transform your business and accelerate growth.</p>
+            <p className="text-primary-foreground/60 text-lg">Des services numériques de bout en bout conçus pour transformer votre entreprise et accélérer votre croissance.</p>
           </motion.div>
         </div>
       </section>
@@ -49,7 +49,7 @@ const Services = () => {
       <section className="py-24 bg-background">
         <div className="container space-y-8">
           {loading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading services...</div>
+            <div className="text-center py-12 text-muted-foreground">Chargement des services...</div>
           ) : (
             services.map((service, i) => {
               const Icon = iconMap[service.icon ?? "Code"] ?? Code;
@@ -81,7 +81,7 @@ const Services = () => {
                         </div>
                       )}
                       <Button asChild size="sm" variant="outline">
-                        <Link to="/contact">Get a Quote <ArrowRight className="h-3.5 w-3.5" /></Link>
+                        <Link to="/contact">Demander un Devis <ArrowRight className="h-3.5 w-3.5" /></Link>
                       </Button>
                     </div>
                   </div>

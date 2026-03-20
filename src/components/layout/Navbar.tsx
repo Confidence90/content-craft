@@ -4,16 +4,16 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const services = [
-  { label: "Web Application", href: "/services#web-app" },
-  { label: "Mobile Application", href: "/services#mobile-app" },
-  { label: "Website Development", href: "/services#website" },
-  { label: "IT Management", href: "/services#it-management" },
-  { label: "Other IT Services", href: "/services#other" },
+  { label: "Application Web", href: "/services#web-app" },
+  { label: "Application Mobile", href: "/services#mobile-app" },
+  { label: "Création de Sites Web", href: "/services#website" },
+  { label: "Infogérance", href: "/services#it-management" },
+  { label: "Autres Services IT", href: "/services#other" },
 ];
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Presentation", href: "/presentation" },
+  { label: "Accueil", href: "/" },
+  { label: "Présentation", href: "/presentation" },
   { label: "Services", href: "/services", children: services },
   { label: "Solutions", href: "/solutions" },
   { label: "Contact", href: "/contact" },
@@ -91,7 +91,7 @@ const Navbar = () => {
 
         <Link to="/contact" className="hidden md:block">
           <button className="bg-accent text-accent-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent/90 transition-all shadow-sm hover:shadow-glow">
-            Get a Quote
+            Demander un Devis
           </button>
         </Link>
 
@@ -138,7 +138,7 @@ const Navbar = () => {
             ))}
             <Link to="/contact" onClick={() => setMobileOpen(false)}>
               <button className="w-full mt-3 bg-accent text-accent-foreground px-5 py-3 rounded-lg text-sm font-semibold">
-                Get a Quote
+                Demander un Devis
               </button>
             </Link>
           </div>

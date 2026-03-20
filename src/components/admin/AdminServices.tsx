@@ -36,7 +36,7 @@ const AdminServices = () => {
   useEffect(() => { fetchServices(); }, []);
 
   const handleAdd = async () => {
-    if (!newService.title) { toast({ title: "Title is required", variant: "destructive" }); return; }
+    if (!newService.title) { toast({ title: "Le titre est requis", variant: "destructive" }); return; }
     const { error } = await supabase.from("services").insert({
       title: newService.title,
       description: newService.description,
@@ -45,8 +45,8 @@ const AdminServices = () => {
       features: newService.features.split(",").map((f) => f.trim()).filter(Boolean),
       sort_order: services.length + 1,
     });
-    if (error) { toast({ title: "Error", variant: "destructive" }); return; }
-    toast({ title: "Service added" });
+    if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
+    toast({ title: "Service ajouté" });
     setShowAdd(false);
     setNewService({ title: "", description: "", icon: "Code", category: "", features: "" });
     fetchServices();
@@ -61,15 +61,15 @@ const AdminServices = () => {
       features: service.features,
       is_active: service.is_active,
     }).eq("id", service.id);
-    if (error) { toast({ title: "Error saving", variant: "destructive" }); return; }
-    toast({ title: "Service updated" });
+    if (error) { toast({ title: "Erreur lors de la sauvegarde", variant: "destructive" }); return; }
+    toast({ title: "Service mis à jour" });
     setEditingId(null);
     fetchServices();
   };
 
   const handleDelete = async (id: string) => {
     await supabase.from("services").delete().eq("id", id);
-    toast({ title: "Service deleted" });
+    toast({ title: "Service supprimé" });
     fetchServices();
   };
 
@@ -83,33 +83,33 @@ const AdminServices = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-heading font-bold text-foreground">Services</h1>
         <Button size="sm" onClick={() => setShowAdd(true)}>
-          <Plus className="h-4 w-4" /> Add Service
+          <Plus className="h-4 w-4" /> Ajouter un Service
         </Button>
       </div>
 
       {showAdd && (
         <div className="bg-card rounded-xl p-6 shadow-card border border-border mb-6 space-y-4">
-          <h3 className="font-heading font-semibold text-foreground">New Service</h3>
+          <h3 className="font-heading font-semibold text-foreground">Nouveau Service</h3>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Input placeholder="Service title" value={newService.title} onChange={(e) => setNewService({ ...newService, title: e.target.value })} />
-            <Input placeholder="Category slug" value={newService.category} onChange={(e) => setNewService({ ...newService, category: e.target.value })} />
+            <Input placeholder="Titre du service" value={newService.title} onChange={(e) => setNewService({ ...newService, title: e.target.value })} />
+            <Input placeholder="Catégorie" value={newService.category} onChange={(e) => setNewService({ ...newService, category: e.target.value })} />
           </div>
           <Textarea placeholder="Description" value={newService.description} onChange={(e) => setNewService({ ...newService, description: e.target.value })} />
           <div className="grid sm:grid-cols-2 gap-4">
             <select className="rounded-lg border border-input bg-background px-3 py-2 text-sm" value={newService.icon} onChange={(e) => setNewService({ ...newService, icon: e.target.value })}>
               {ICONS.map((i) => <option key={i} value={i}>{i}</option>)}
             </select>
-            <Input placeholder="Features (comma separated)" value={newService.features} onChange={(e) => setNewService({ ...newService, features: e.target.value })} />
+            <Input placeholder="Fonctionnalités (séparées par des virgules)" value={newService.features} onChange={(e) => setNewService({ ...newService, features: e.target.value })} />
           </div>
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Save</Button>
-            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
+            <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
           </div>
         </div>
       )}
 
       {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">Chargement...</p>
       ) : (
         <div className="space-y-3">
           {services.map((service) => (
@@ -125,11 +125,11 @@ const AdminServices = () => {
                     <select className="rounded-lg border border-input bg-background px-3 py-2 text-sm" value={service.icon ?? "Code"} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, icon: e.target.value } : s))}>
                       {ICONS.map((i) => <option key={i} value={i}>{i}</option>)}
                     </select>
-                    <Input value={(service.features ?? []).join(", ")} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, features: e.target.value.split(",").map((f) => f.trim()) } : s))} placeholder="Features (comma separated)" />
+                    <Input value={(service.features ?? []).join(", ")} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, features: e.target.value.split(",").map((f) => f.trim()) } : s))} placeholder="Fonctionnalités (séparées par des virgules)" />
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSave(service)}><Save className="h-4 w-4" /> Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchServices(); }}>Cancel</Button>
+                    <Button size="sm" onClick={() => handleSave(service)}><Save className="h-4 w-4" /> Enregistrer</Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchServices(); }}>Annuler</Button>
                   </div>
                 </div>
               ) : (

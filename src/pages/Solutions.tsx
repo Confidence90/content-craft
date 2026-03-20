@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const solutions = [
-  { icon: Zap, title: "Digital Transformation", desc: "Modernize your business processes with end-to-end digital solutions that increase efficiency and reduce costs.", tag: "Strategy" },
-  { icon: BarChart3, title: "Business Intelligence", desc: "Turn your data into actionable insights with custom dashboards, analytics, and reporting tools.", tag: "Analytics" },
-  { icon: Cloud, title: "Cloud Solutions", desc: "Migrate, optimize, and manage your cloud infrastructure for maximum performance and cost savings.", tag: "Infrastructure" },
-  { icon: Lock, title: "Enterprise Security", desc: "Comprehensive security frameworks to protect your data, applications, and users.", tag: "Security" },
-  { icon: Layers, title: "SaaS Development", desc: "Build and launch scalable SaaS products with modern architecture and seamless user experiences.", tag: "Product" },
-  { icon: Cpu, title: "AI & Automation", desc: "Leverage artificial intelligence and automation to streamline workflows and drive innovation.", tag: "Innovation" },
+  { icon: Zap, title: "Transformation Numérique", desc: "Modernisez vos processus métier avec des solutions numériques de bout en bout qui augmentent l'efficacité et réduisent les coûts.", tag: "Stratégie" },
+  { icon: BarChart3, title: "Intelligence d'Affaires", desc: "Transformez vos données en informations exploitables grâce à des tableaux de bord, analyses et outils de reporting personnalisés.", tag: "Analytique" },
+  { icon: Cloud, title: "Solutions Cloud", desc: "Migrez, optimisez et gérez votre infrastructure cloud pour une performance et des économies maximales.", tag: "Infrastructure" },
+  { icon: Lock, title: "Sécurité d'Entreprise", desc: "Des cadres de sécurité complets pour protéger vos données, applications et utilisateurs.", tag: "Sécurité" },
+  { icon: Layers, title: "Développement SaaS", desc: "Créez et lancez des produits SaaS évolutifs avec une architecture moderne et des expériences utilisateur fluides.", tag: "Produit" },
+  { icon: Cpu, title: "IA & Automatisation", desc: "Exploitez l'intelligence artificielle et l'automatisation pour optimiser les flux de travail et stimuler l'innovation.", tag: "Innovation" },
 ];
 
 const Solutions = () => {
@@ -18,12 +18,12 @@ const Solutions = () => {
       <section className="bg-hero py-20">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Digital Solutions</p>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Solutions Numériques</p>
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground mb-4">
-              Solutions for Every Challenge
+              Des Solutions Pour Chaque Défi
             </h1>
             <p className="text-primary-foreground/60 text-lg">
-              Comprehensive digital solutions designed to solve your most complex business challenges.
+              Des solutions numériques complètes conçues pour résoudre vos défis métier les plus complexes.
             </p>
           </motion.div>
         </div>
@@ -51,7 +51,7 @@ const Solutions = () => {
                 <p className="text-sm text-muted-foreground leading-relaxed flex-1">{desc}</p>
                 <div className="mt-6">
                   <Button asChild size="sm" variant="ghost" className="text-accent hover:text-accent px-0">
-                    <Link to="/contact">Learn More <ArrowRight className="h-3.5 w-3.5" /></Link>
+                    <Link to="/contact">En Savoir Plus <ArrowRight className="h-3.5 w-3.5" /></Link>
                   </Button>
                 </div>
               </motion.div>
@@ -65,13 +65,13 @@ const Solutions = () => {
         <div className="container text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary-foreground mb-4">
-              Need a Custom Solution?
+              Besoin d'une Solution Sur Mesure ?
             </h2>
             <p className="text-primary-foreground/60 mb-8 max-w-lg mx-auto">
-              Let our team of experts design a tailored solution that perfectly fits your business needs.
+              Laissez notre équipe d'experts concevoir une solution adaptée qui correspond parfaitement à vos besoins.
             </p>
             <Button asChild variant="hero" size="xl">
-              <Link to="/contact">Contact Us <ArrowRight className="h-5 w-5" /></Link>
+              <Link to="/contact">Contactez-Nous <ArrowRight className="h-5 w-5" /></Link>
             </Button>
           </motion.div>
         </div>
