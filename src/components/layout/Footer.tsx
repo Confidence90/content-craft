@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="bg-primary text-primary-foreground">
       <div className="container py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand */}
+          {/* Marque */}
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="h-9 w-9 rounded-lg bg-accent flex items-center justify-center">
@@ -15,7 +15,7 @@ const Footer = () => {
               <span className="font-heading font-bold text-xl">TechCorp</span>
             </div>
             <p className="text-primary-foreground/60 text-sm leading-relaxed">
-              Empowering businesses with innovative digital solutions. We build the technology that drives your success.
+              Accompagner les entreprises avec des solutions numériques innovantes. Nous construisons la technologie qui propulse votre succès.
             </p>
             <div className="flex gap-3 mt-6">
               {[Facebook, Twitter, Youtube, Linkedin, Instagram].map((Icon, i) => (
@@ -26,17 +26,23 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Liens Rapides */}
           <div>
-            <h4 className="font-heading font-semibold mb-4">Quick Links</h4>
+            <h4 className="font-heading font-semibold mb-4">Liens Rapides</h4>
             <ul className="space-y-2.5 text-sm">
-              {["Home", "Presentation", "Services", "Solutions", "Contact"].map((item) => (
-                <li key={item}>
+              {[
+                { label: "Accueil", href: "/" },
+                { label: "Présentation", href: "/presentation" },
+                { label: "Services", href: "/services" },
+                { label: "Solutions", href: "/solutions" },
+                { label: "Contact", href: "/contact" },
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    to={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                    to={item.href}
                     className="text-primary-foreground/60 hover:text-accent transition-colors"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -47,11 +53,11 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-semibold mb-4">Services</h4>
             <ul className="space-y-2.5 text-sm text-primary-foreground/60">
-              <li>Web Applications</li>
-              <li>Mobile Applications</li>
-              <li>Website Development</li>
-              <li>IT Management</li>
-              <li>IT Consulting</li>
+              <li>Applications Web</li>
+              <li>Applications Mobiles</li>
+              <li>Création de Sites Web</li>
+              <li>Infogérance</li>
+              <li>Conseil IT</li>
             </ul>
           </div>
 
@@ -61,11 +67,11 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-primary-foreground/60">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>123 Innovation Blvd, Tech City, TC 10001</span>
+                <span>123 Boulevard de l'Innovation, 75001 Paris, France</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
-                <span>+1 (234) 567-890</span>
+                <span>+33 1 23 45 67 89</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
@@ -76,7 +82,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-sm text-primary-foreground/40">
-          © {new Date().getFullYear()} TechCorp. All rights reserved.
+          © {new Date().getFullYear()} TechCorp. Tous droits réservés.
         </div>
       </div>
     </footer>

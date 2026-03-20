@@ -28,15 +28,15 @@ const AdminOverview = ({ onNavigate }: AdminOverviewProps) => {
   }, []);
 
   const cards = [
-    { label: "Content Items", value: stats.content, icon: FileText, tab: "content", color: "text-blue-500" },
+    { label: "Éléments de Contenu", value: stats.content, icon: FileText, tab: "content", color: "text-blue-500" },
     { label: "Services", value: stats.services, icon: Settings2, tab: "services", color: "text-accent" },
     { label: "Messages", value: stats.messages, icon: MessageSquare, tab: "messages", color: "text-green-500" },
-    { label: "Unread Messages", value: stats.unread, icon: Eye, tab: "messages", color: "text-orange-500" },
+    { label: "Messages Non Lus", value: stats.unread, icon: Eye, tab: "messages", color: "text-orange-500" },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-heading font-bold text-foreground mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-heading font-bold text-foreground mb-6">Tableau de Bord</h1>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map(({ label, value, icon: Icon, tab, color }) => (
           <button

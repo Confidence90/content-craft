@@ -39,7 +39,7 @@ const AdminMessages = () => {
 
   const handleDelete = async (id: string) => {
     await supabase.from("contact_messages").delete().eq("id", id);
-    toast({ title: "Message deleted" });
+    toast({ title: "Message supprimé" });
     if (selectedId === id) setSelectedId(null);
     fetchMessages();
   };
@@ -48,18 +48,18 @@ const AdminMessages = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-heading font-bold text-foreground mb-6">Contact Messages</h1>
+      <h1 className="text-2xl font-heading font-bold text-foreground mb-6">Messages de Contact</h1>
 
       {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">Chargement...</p>
       ) : messages.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Mail className="h-10 w-10 mx-auto mb-3 opacity-40" />
-          <p>No messages yet.</p>
+          <p>Aucun message pour le moment.</p>
         </div>
       ) : (
         <div className="grid lg:grid-cols-5 gap-6">
-          {/* Message list */}
+          {/* Liste des messages */}
           <div className="lg:col-span-2 space-y-2 max-h-[70vh] overflow-auto">
             {messages.map((msg) => (
               <button
@@ -79,14 +79,14 @@ const AdminMessages = () => {
               >
                 <div className="flex items-center justify-between mb-1">
                   <p className={`text-sm font-medium ${!msg.is_read ? "text-foreground" : "text-muted-foreground"}`}>{msg.name}</p>
-                  <span className="text-xs text-muted-foreground">{new Date(msg.created_at).toLocaleDateString()}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(msg.created_at).toLocaleDateString("fr-FR")}</span>
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{msg.subject || msg.message}</p>
               </button>
             ))}
           </div>
 
-          {/* Message detail */}
+          {/* Détail du message */}
           <div className="lg:col-span-3">
             {selected ? (
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">
@@ -108,7 +108,7 @@ const AdminMessages = () => {
 
                 {selected.subject && (
                   <div className="mb-4">
-                    <p className="text-xs text-muted-foreground mb-1">Subject</p>
+                    <p className="text-xs text-muted-foreground mb-1">Sujet</p>
                     <p className="text-sm font-medium text-foreground">{selected.subject}</p>
                   </div>
                 )}
@@ -119,17 +119,17 @@ const AdminMessages = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
-                  {selected.phone && <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm text-foreground">{selected.phone}</p></div>}
-                  {selected.address && <div><p className="text-xs text-muted-foreground">Address</p><p className="text-sm text-foreground">{selected.address}</p></div>}
+                  {selected.phone && <div><p className="text-xs text-muted-foreground">Téléphone</p><p className="text-sm text-foreground">{selected.phone}</p></div>}
+                  {selected.address && <div><p className="text-xs text-muted-foreground">Adresse</p><p className="text-sm text-foreground">{selected.address}</p></div>}
                 </div>
 
                 <p className="text-xs text-muted-foreground mt-4">
-                  Received {new Date(selected.created_at).toLocaleString()}
+                  Reçu le {new Date(selected.created_at).toLocaleString("fr-FR")}
                 </p>
               </div>
             ) : (
               <div className="flex items-center justify-center h-64 text-muted-foreground">
-                <p>Select a message to view</p>
+                <p>Sélectionnez un message pour le consulter</p>
               </div>
             )}
           </div>

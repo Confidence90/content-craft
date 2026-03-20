@@ -41,14 +41,14 @@ const AdminContent = () => {
       content_key: item.content_key,
       section: item.section,
     }).eq("id", item.id);
-    if (error) { toast({ title: "Error saving", variant: "destructive" }); return; }
-    toast({ title: "Content updated" });
+    if (error) { toast({ title: "Erreur lors de la sauvegarde", variant: "destructive" }); return; }
+    toast({ title: "Contenu mis à jour" });
     setEditingId(null);
     fetchContent();
   };
 
   const handleAdd = async () => {
-    if (!newItem.section || !newItem.content_key) { toast({ title: "Section and key required", variant: "destructive" }); return; }
+    if (!newItem.section || !newItem.content_key) { toast({ title: "Section et clé requises", variant: "destructive" }); return; }
     const { error } = await supabase.from("site_content").insert({
       page: newItem.page,
       section: newItem.section,
@@ -56,8 +56,8 @@ const AdminContent = () => {
       content_value: newItem.content_value,
       content_type: newItem.content_type,
     });
-    if (error) { toast({ title: "Error adding content", variant: "destructive" }); return; }
-    toast({ title: "Content added" });
+    if (error) { toast({ title: "Erreur lors de l'ajout", variant: "destructive" }); return; }
+    toast({ title: "Contenu ajouté" });
     setShowAdd(false);
     setNewItem({ page: selectedPage, section: "", content_key: "", content_value: "", content_type: "text" });
     fetchContent();
@@ -65,16 +65,16 @@ const AdminContent = () => {
 
   const handleDelete = async (id: string) => {
     await supabase.from("site_content").delete().eq("id", id);
-    toast({ title: "Content deleted" });
+    toast({ title: "Contenu supprimé" });
     fetchContent();
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-heading font-bold text-foreground">Page Content</h1>
+        <h1 className="text-2xl font-heading font-bold text-foreground">Contenu des Pages</h1>
         <Button size="sm" onClick={() => { setShowAdd(true); setNewItem({ ...newItem, page: selectedPage }); }}>
-          <Plus className="h-4 w-4" /> Add Content
+          <Plus className="h-4 w-4" /> Ajouter du Contenu
         </Button>
       </div>
 
@@ -88,7 +88,7 @@ const AdminContent = () => {
               selectedPage === p ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground hover:text-foreground"
             }`}
           >
-            {p}
+            {p === "home" ? "Accueil" : p === "presentation" ? "Présentation" : p}
           </button>
         ))}
       </div>
@@ -96,34 +96,34 @@ const AdminContent = () => {
       {/* Add form */}
       {showAdd && (
         <div className="bg-card rounded-xl p-6 shadow-card border border-border mb-6 space-y-4">
-          <h3 className="font-heading font-semibold text-foreground">New Content Item</h3>
+          <h3 className="font-heading font-semibold text-foreground">Nouvel Élément de Contenu</h3>
           <div className="grid sm:grid-cols-3 gap-4">
-            <Input placeholder="Section (e.g. hero)" value={newItem.section} onChange={(e) => setNewItem({ ...newItem, section: e.target.value })} />
-            <Input placeholder="Key (e.g. title)" value={newItem.content_key} onChange={(e) => setNewItem({ ...newItem, content_key: e.target.value })} />
+            <Input placeholder="Section (ex : hero)" value={newItem.section} onChange={(e) => setNewItem({ ...newItem, section: e.target.value })} />
+            <Input placeholder="Clé (ex : titre)" value={newItem.content_key} onChange={(e) => setNewItem({ ...newItem, content_key: e.target.value })} />
             <select
               className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
               value={newItem.content_type}
               onChange={(e) => setNewItem({ ...newItem, content_type: e.target.value })}
             >
-              <option value="text">Text</option>
-              <option value="image">Image URL</option>
-              <option value="video">Video URL</option>
+              <option value="text">Texte</option>
+              <option value="image">URL Image</option>
+              <option value="video">URL Vidéo</option>
             </select>
           </div>
-          <Textarea placeholder="Content value..." value={newItem.content_value} onChange={(e) => setNewItem({ ...newItem, content_value: e.target.value })} />
+          <Textarea placeholder="Valeur du contenu..." value={newItem.content_value} onChange={(e) => setNewItem({ ...newItem, content_value: e.target.value })} />
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Save</Button>
-            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
+            <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
           </div>
         </div>
       )}
 
       {/* Content list */}
       {loading ? (
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">Chargement...</p>
       ) : items.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No content for this page yet. Click "Add Content" to get started.</p>
+          <p>Aucun contenu pour cette page. Cliquez sur « Ajouter du Contenu » pour commencer.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -137,8 +137,8 @@ const AdminContent = () => {
                   </div>
                   <Textarea value={item.content_value ?? ""} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: e.target.value } : i))} />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSave(item)}><Save className="h-4 w-4" /> Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchContent(); }}>Cancel</Button>
+                    <Button size="sm" onClick={() => handleSave(item)}><Save className="h-4 w-4" /> Enregistrer</Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchContent(); }}>Annuler</Button>
                   </div>
                 </div>
               ) : (

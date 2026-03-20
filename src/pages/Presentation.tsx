@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { Target, Eye, Users, Award, CheckCircle } from "lucide-react";
 
 const team = [
-  { name: "David Laurent", role: "CEO & Founder", initials: "DL" },
-  { name: "Sophie Martin", role: "CTO", initials: "SM" },
-  { name: "Alex Rivera", role: "Head of Design", initials: "AR" },
-  { name: "Emma Williams", role: "VP Engineering", initials: "EW" },
+  { name: "David Laurent", role: "PDG & Fondateur", initials: "DL" },
+  { name: "Sophie Martin", role: "Directrice Technique", initials: "SM" },
+  { name: "Alex Rivera", role: "Directeur Design", initials: "AR" },
+  { name: "Emma Williams", role: "VP Ingénierie", initials: "EW" },
 ];
 
 const Presentation = () => {
@@ -15,12 +15,12 @@ const Presentation = () => {
       <section className="bg-hero py-20">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Who We Are</p>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Qui Sommes-Nous</p>
             <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground mb-4">
-              Our Company
+              Notre Entreprise
             </h1>
             <p className="text-primary-foreground/60 text-lg">
-              Pioneering digital transformation since 2009. We combine innovation with reliability.
+              Pionniers de la transformation numérique depuis 2009. Nous allions innovation et fiabilité.
             </p>
           </motion.div>
         </div>
@@ -39,12 +39,12 @@ const Presentation = () => {
               <div className="h-14 w-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6">
                 <Target className="h-7 w-7 text-accent" />
               </div>
-              <h2 className="text-2xl font-heading font-bold text-foreground mb-4">Our Mission</h2>
+              <h2 className="text-2xl font-heading font-bold text-foreground mb-4">Notre Mission</h2>
               <p className="text-muted-foreground leading-relaxed">
-                To empower businesses of all sizes with cutting-edge technology solutions that drive growth, efficiency, and innovation. We believe that great technology should be accessible, reliable, and transformative.
+                Accompagner les entreprises de toutes tailles avec des solutions technologiques de pointe qui stimulent la croissance, l'efficacité et l'innovation. Nous croyons qu'une technologie de qualité doit être accessible, fiable et transformatrice.
               </p>
               <ul className="mt-6 space-y-3">
-                {["Deliver exceptional quality", "Foster long-term partnerships", "Drive measurable results"].map((item) => (
+                {["Livrer une qualité exceptionnelle", "Favoriser des partenariats durables", "Générer des résultats mesurables"].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-muted-foreground">
                     <CheckCircle className="h-4 w-4 text-accent shrink-0" />
                     {item}
@@ -62,12 +62,12 @@ const Presentation = () => {
               <div className="h-14 w-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6">
                 <Eye className="h-7 w-7 text-accent" />
               </div>
-              <h2 className="text-2xl font-heading font-bold text-foreground mb-4">Our Vision</h2>
+              <h2 className="text-2xl font-heading font-bold text-foreground mb-4">Notre Vision</h2>
               <p className="text-muted-foreground leading-relaxed">
-                To become the leading digital transformation partner globally, recognized for our innovative solutions, exceptional service, and commitment to client success. We envision a world where technology seamlessly enhances every business.
+                Devenir le partenaire de référence en transformation numérique à l'échelle mondiale, reconnu pour nos solutions innovantes, notre service exceptionnel et notre engagement envers la réussite de nos clients.
               </p>
               <ul className="mt-6 space-y-3">
-                {["Global technology leader", "Innovation-first approach", "Sustainable digital future"].map((item) => (
+                {["Leader technologique mondial", "Approche axée sur l'innovation", "Avenir numérique durable"].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-muted-foreground">
                     <CheckCircle className="h-4 w-4 text-accent shrink-0" />
                     {item}
@@ -79,19 +79,19 @@ const Presentation = () => {
         </div>
       </section>
 
-      {/* Values */}
+      {/* Valeurs */}
       <section className="py-24 bg-secondary/50">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Our Values</p>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">What Guides Us</h2>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Nos Valeurs</p>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Ce Qui Nous Guide</h2>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Award, title: "Excellence", desc: "We pursue the highest standards in everything we do." },
-              { icon: Users, title: "Collaboration", desc: "We believe the best solutions come from working together." },
-              { icon: Target, title: "Innovation", desc: "We constantly push boundaries and explore new possibilities." },
-              { icon: CheckCircle, title: "Integrity", desc: "Transparency and honesty are at the core of our relationships." },
+              { icon: Award, title: "Excellence", desc: "Nous visons les plus hauts standards dans tout ce que nous faisons." },
+              { icon: Users, title: "Collaboration", desc: "Nous croyons que les meilleures solutions naissent du travail d'équipe." },
+              { icon: Target, title: "Innovation", desc: "Nous repoussons constamment les limites et explorons de nouvelles possibilités." },
+              { icon: CheckCircle, title: "Intégrité", desc: "La transparence et l'honnêteté sont au cœur de nos relations." },
             ].map(({ icon: Icon, title, desc }, i) => (
               <motion.div
                 key={title}
@@ -112,12 +112,12 @@ const Presentation = () => {
         </div>
       </section>
 
-      {/* Team */}
+      {/* Équipe */}
       <section className="py-24 bg-background">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Our Team</p>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Meet the Experts</h2>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Notre Équipe</p>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">Rencontrez Nos Experts</h2>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {team.map(({ name, role, initials }, i) => (
