@@ -14,25 +14,25 @@ const fadeUp = {
 };
 
 const services = [
-  { icon: Globe, title: "Web Applications", desc: "Scalable, high-performance web apps tailored to your business needs." },
-  { icon: Smartphone, title: "Mobile Applications", desc: "Native & cross-platform mobile solutions for iOS and Android." },
-  { icon: Monitor, title: "Website Development", desc: "Stunning, responsive websites that convert visitors into customers." },
-  { icon: Server, title: "IT Management", desc: "Comprehensive IT infrastructure management and monitoring." },
-  { icon: Shield, title: "Cybersecurity", desc: "Protect your business with advanced security solutions." },
-  { icon: Code, title: "Custom Solutions", desc: "Bespoke software development for unique business challenges." },
+  { icon: Globe, title: "Applications Web", desc: "Applications web performantes et évolutives adaptées à vos besoins métier." },
+  { icon: Smartphone, title: "Applications Mobiles", desc: "Solutions mobiles natives et multiplateformes pour iOS et Android." },
+  { icon: Monitor, title: "Création de Sites Web", desc: "Sites web modernes et responsifs qui convertissent les visiteurs en clients." },
+  { icon: Server, title: "Infogérance", desc: "Gestion et supervision complètes de votre infrastructure informatique." },
+  { icon: Shield, title: "Cybersécurité", desc: "Protégez votre entreprise avec des solutions de sécurité avancées." },
+  { icon: Code, title: "Solutions Sur Mesure", desc: "Développement logiciel personnalisé pour relever vos défis uniques." },
 ];
 
 const stats = [
-  { value: "250+", label: "Projects Delivered", icon: Briefcase },
-  { value: "120+", label: "Happy Clients", icon: Users },
-  { value: "15+", label: "Years Experience", icon: Award },
-  { value: "99%", label: "Client Satisfaction", icon: Star },
+  { value: "250+", label: "Projets Livrés", icon: Briefcase },
+  { value: "120+", label: "Clients Satisfaits", icon: Users },
+  { value: "15+", label: "Années d'Expérience", icon: Award },
+  { value: "99%", label: "Satisfaction Client", icon: Star },
 ];
 
 const testimonials = [
-  { name: "Sarah Chen", role: "CTO, FinVault", quote: "TechCorp delivered an exceptional platform that transformed our operations. Their attention to detail is remarkable." },
-  { name: "Marcus Johnson", role: "CEO, GreenLeaf", quote: "Working with TechCorp was a game-changer. They understood our vision and built exactly what we needed." },
-  { name: "Aisha Patel", role: "VP Engineering, CloudSync", quote: "The team's expertise in cloud architecture helped us scale from 1K to 1M users seamlessly." },
+  { name: "Sophie Martin", role: "DG, FinVault", quote: "TechCorp a livré une plateforme exceptionnelle qui a transformé nos opérations. Leur souci du détail est remarquable." },
+  { name: "Marc Dupont", role: "PDG, GreenLeaf", quote: "Travailler avec TechCorp a été un tournant. Ils ont compris notre vision et ont construit exactement ce dont nous avions besoin." },
+  { name: "Aïcha Benali", role: "VP Ingénierie, CloudSync", quote: "L'expertise de l'équipe en architecture cloud nous a permis de passer de 1K à 1M d'utilisateurs sans difficulté." },
 ];
 
 const Index = () => {
@@ -51,31 +51,31 @@ const Index = () => {
             className="max-w-2xl"
           >
             <motion.p variants={fadeUp} custom={0} className="text-accent font-medium mb-4 tracking-wider text-sm uppercase">
-              Digital Excellence
+              Excellence Numérique
             </motion.p>
             <motion.h1 variants={fadeUp} custom={1} className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary-foreground leading-tight mb-6">
-              We Build Technology That{" "}
-              <span className="text-gradient">Drives Growth</span>
+              Nous Créons la Technologie qui{" "}
+              <span className="text-gradient">Accélère votre Croissance</span>
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-lg text-primary-foreground/70 mb-8 leading-relaxed max-w-lg">
-              From web applications to complete IT infrastructure, we deliver innovative digital solutions that empower your business to thrive.
+              Des applications web à l'infrastructure IT complète, nous livrons des solutions numériques innovantes qui permettent à votre entreprise de prospérer.
             </motion.p>
             <motion.div variants={fadeUp} custom={3} className="flex flex-wrap gap-4">
               <Button asChild variant="hero" size="xl">
                 <Link to="/contact">
-                  Request a Quote
+                  Demander un Devis
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild variant="hero-outline" size="xl">
-                <Link to="/services">Our Services</Link>
+                <Link to="/services">Nos Services</Link>
               </Button>
             </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* About Preview */}
+      {/* À Propos */}
       <section className="py-24 bg-background">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -85,15 +85,15 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">About Us</p>
+              <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">À Propos</p>
               <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-6">
-                Your Trusted Partner in Digital Transformation
+                Votre Partenaire de Confiance en Transformation Numérique
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                With over 15 years of experience, TechCorp has been at the forefront of digital innovation. We combine technical expertise with strategic thinking to deliver solutions that make a real impact.
+                Avec plus de 15 ans d'expérience, TechCorp est à la pointe de l'innovation numérique. Nous combinons expertise technique et réflexion stratégique pour livrer des solutions à fort impact.
               </p>
               <ul className="space-y-3 mb-8">
-                {["Expert team of 50+ engineers", "Agile development methodology", "24/7 support & maintenance", "ISO 27001 certified"].map((item) => (
+                {["Équipe de plus de 50 ingénieurs experts", "Méthodologie de développement Agile", "Support & maintenance 24h/24 7j/7", "Certification ISO 27001"].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-muted-foreground">
                     <CheckCircle className="h-4 w-4 text-accent shrink-0" />
                     {item}
@@ -101,7 +101,7 @@ const Index = () => {
                 ))}
               </ul>
               <Button asChild>
-                <Link to="/presentation">Learn More <ArrowRight className="h-4 w-4" /></Link>
+                <Link to="/presentation">En Savoir Plus <ArrowRight className="h-4 w-4" /></Link>
               </Button>
             </motion.div>
             <motion.div
@@ -125,7 +125,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Services Preview */}
+      {/* Aperçu Services */}
       <section className="py-24 bg-secondary/50">
         <div className="container">
           <motion.div
@@ -134,12 +134,12 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">What We Do</p>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Ce Que Nous Faisons</p>
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
-              Services That Drive Results
+              Des Services Qui Génèrent des Résultats
             </h2>
             <p className="text-muted-foreground">
-              Comprehensive digital services designed to accelerate your business growth and streamline operations.
+              Des services numériques complets conçus pour accélérer la croissance de votre entreprise et optimiser vos opérations.
             </p>
           </motion.div>
 
@@ -164,13 +164,13 @@ const Index = () => {
 
           <div className="text-center mt-12">
             <Button asChild variant="outline" size="lg">
-              <Link to="/services">View All Services <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/services">Voir Tous les Services <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Témoignages */}
       <section className="py-24 bg-background">
         <div className="container">
           <motion.div
@@ -179,9 +179,9 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center max-w-2xl mx-auto mb-16"
           >
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Testimonials</p>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">Témoignages</p>
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
-              What Our Clients Say
+              Ce Que Disent Nos Clients
             </h2>
           </motion.div>
 
@@ -220,13 +220,13 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary-foreground mb-4">
-              Ready to Transform Your Business?
+              Prêt à Transformer Votre Entreprise ?
             </h2>
             <p className="text-primary-foreground/60 mb-8 max-w-lg mx-auto">
-              Let's discuss how our solutions can help you achieve your goals.
+              Discutons de la façon dont nos solutions peuvent vous aider à atteindre vos objectifs.
             </p>
             <Button asChild variant="hero" size="xl">
-              <Link to="/contact">Get Started Today <ArrowRight className="h-5 w-5" /></Link>
+              <Link to="/contact">Commencer Maintenant <ArrowRight className="h-5 w-5" /></Link>
             </Button>
           </motion.div>
         </div>
