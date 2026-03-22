@@ -102,6 +102,12 @@ const AdminServices = () => {
             </select>
             <Input placeholder="Fonctionnalités (séparées par des virgules)" value={newService.features} onChange={(e) => setNewService({ ...newService, features: e.target.value })} />
           </div>
+          <ImageUpload
+            value=""
+            onChange={() => {}}
+            folder="services"
+            label="Image du service (optionnel)"
+          />
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
             <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
