@@ -145,7 +145,16 @@ const AdminContent = () => {
                     <Input value={item.section} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, section: e.target.value } : i))} />
                     <Input value={item.content_key} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_key: e.target.value } : i))} />
                   </div>
-                  <Textarea value={item.content_value ?? ""} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: e.target.value } : i))} />
+                  {item.content_type === "image" ? (
+                    <ImageUpload
+                      value={item.content_value ?? ""}
+                      onChange={(url) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: url } : i))}
+                      folder={`content/${item.page}`}
+                      label="Image"
+                    />
+                  ) : (
+                    <Textarea value={item.content_value ?? ""} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: e.target.value } : i))} />
+                  )}
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleSave(item)}><Save className="h-4 w-4" /> Enregistrer</Button>
                     <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchContent(); }}>Annuler</Button>
