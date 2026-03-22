@@ -111,7 +111,16 @@ const AdminContent = () => {
               <option value="video">URL Vidéo</option>
             </select>
           </div>
-          <Textarea placeholder="Valeur du contenu..." value={newItem.content_value} onChange={(e) => setNewItem({ ...newItem, content_value: e.target.value })} />
+          {newItem.content_type === "image" ? (
+            <ImageUpload
+              value={newItem.content_value}
+              onChange={(url) => setNewItem({ ...newItem, content_value: url })}
+              folder={`content/${selectedPage}`}
+              label="Image"
+            />
+          ) : (
+            <Textarea placeholder="Valeur du contenu..." value={newItem.content_value} onChange={(e) => setNewItem({ ...newItem, content_value: e.target.value })} />
+          )}
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
             <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
