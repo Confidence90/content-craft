@@ -168,7 +168,11 @@ const AdminContent = () => {
                       <span className="text-xs text-muted-foreground">{item.content_key}</span>
                       <span className="text-xs text-muted-foreground/60">({item.content_type})</span>
                     </div>
-                    <p className="text-sm text-foreground truncate">{item.content_value || "—"}</p>
+                    {item.content_type === "image" && item.content_value ? (
+                      <img src={item.content_value} alt={item.content_key} className="h-16 w-24 object-cover rounded mt-1" />
+                    ) : (
+                      <p className="text-sm text-foreground truncate">{item.content_value || "—"}</p>
+                    )}
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => setEditingId(item.id)}>
