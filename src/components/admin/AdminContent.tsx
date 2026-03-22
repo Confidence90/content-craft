@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 interface ContentItem {
   id: string;
@@ -110,7 +111,16 @@ const AdminContent = () => {
               <option value="video">URL Vidéo</option>
             </select>
           </div>
-          <Textarea placeholder="Valeur du contenu..." value={newItem.content_value} onChange={(e) => setNewItem({ ...newItem, content_value: e.target.value })} />
+          {newItem.content_type === "image" ? (
+            <ImageUpload
+              value={newItem.content_value}
+              onChange={(url) => setNewItem({ ...newItem, content_value: url })}
+              folder={`content/${selectedPage}`}
+              label="Image"
+            />
+          ) : (
+            <Textarea placeholder="Valeur du contenu..." value={newItem.content_value} onChange={(e) => setNewItem({ ...newItem, content_value: e.target.value })} />
+          )}
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
             <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
@@ -135,7 +145,16 @@ const AdminContent = () => {
                     <Input value={item.section} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, section: e.target.value } : i))} />
                     <Input value={item.content_key} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_key: e.target.value } : i))} />
                   </div>
-                  <Textarea value={item.content_value ?? ""} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: e.target.value } : i))} />
+                  {item.content_type === "image" ? (
+                    <ImageUpload
+                      value={item.content_value ?? ""}
+                      onChange={(url) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: url } : i))}
+                      folder={`content/${item.page}`}
+                      label="Image"
+                    />
+                  ) : (
+                    <Textarea value={item.content_value ?? ""} onChange={(e) => setItems(items.map((i) => i.id === item.id ? { ...i, content_value: e.target.value } : i))} />
+                  )}
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleSave(item)}><Save className="h-4 w-4" /> Enregistrer</Button>
                     <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchContent(); }}>Annuler</Button>
@@ -149,7 +168,11 @@ const AdminContent = () => {
                       <span className="text-xs text-muted-foreground">{item.content_key}</span>
                       <span className="text-xs text-muted-foreground/60">({item.content_type})</span>
                     </div>
-                    <p className="text-sm text-foreground truncate">{item.content_value || "—"}</p>
+                    {item.content_type === "image" && item.content_value ? (
+                      <img src={item.content_value} alt={item.content_key} className="h-16 w-24 object-cover rounded mt-1" />
+                    ) : (
+                      <p className="text-sm text-foreground truncate">{item.content_value || "—"}</p>
+                    )}
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => setEditingId(item.id)}>

@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Save, Trash2, Edit2, GripVertical } from "lucide-react";
+import { Plus, Save, Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 interface Service {
   id: string;
@@ -101,6 +102,12 @@ const AdminServices = () => {
             </select>
             <Input placeholder="Fonctionnalités (séparées par des virgules)" value={newService.features} onChange={(e) => setNewService({ ...newService, features: e.target.value })} />
           </div>
+          <ImageUpload
+            value=""
+            onChange={() => {}}
+            folder="services"
+            label="Image du service (optionnel)"
+          />
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
             <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
