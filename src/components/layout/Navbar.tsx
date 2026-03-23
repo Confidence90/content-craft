@@ -1,30 +1,32 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const services = [
-  { label: "Application Web", href: "/services#web-app" },
-  { label: "Application Mobile", href: "/services#mobile-app" },
-  { label: "Création de Sites Web", href: "/services#website" },
-  { label: "Infogérance", href: "/services#it-management" },
-  { label: "Autres Services IT", href: "/services#other" },
-];
-
-const navLinks = [
-  { label: "Accueil", href: "/" },
-  { label: "Présentation", href: "/presentation" },
-  { label: "Services", href: "/services", children: services },
-  { label: "Solutions", href: "/solutions" },
-  { label: "Contact", href: "/contact" },
-];
+import { useLanguage } from "@/hooks/useLanguage";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
+  const { lang, setLang } = useLanguage();
 
   const isActive = (href: string) => location.pathname === href;
+
+  const services = [
+    { label: lang === "en" ? "Web Application" : "Application Web", href: "/services#web-app" },
+    { label: lang === "en" ? "Mobile Application" : "Application Mobile", href: "/services#mobile-app" },
+    { label: lang === "en" ? "Website Development" : "Création de Sites Web", href: "/services#website" },
+    { label: lang === "en" ? "IT Management" : "Infogérance", href: "/services#it-management" },
+    { label: lang === "en" ? "Other IT Services" : "Autres Services IT", href: "/services#other" },
+  ];
+
+  const navLinks = [
+    { label: lang === "en" ? "Home" : "Accueil", href: "/" },
+    { label: lang === "en" ? "About" : "Présentation", href: "/presentation" },
+    { label: "Services", href: "/services", children: services },
+    { label: "Solutions", href: "/solutions" },
+    { label: "Contact", href: "/contact" },
+  ];
 
   return (
     <nav className="bg-card/95 backdrop-blur-md border-b border-border sticky top-0 z-50">
@@ -50,9 +52,7 @@ const Navbar = () => {
                   to={link.href}
                   className={cn(
                     "flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
-                    isActive(link.href)
-                      ? "text-accent bg-accent/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    isActive(link.href) ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
                   {link.label}
@@ -61,11 +61,7 @@ const Navbar = () => {
                 {dropdownOpen && (
                   <div className="absolute top-full left-0 mt-1 w-56 bg-card rounded-xl shadow-elevated border border-border p-2 animate-fade-in">
                     {link.children.map((child) => (
-                      <Link
-                        key={child.label}
-                        to={child.href}
-                        className="block px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                      >
+                      <Link key={child.label} to={child.href} className="block px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
                         {child.label}
                       </Link>
                     ))}
@@ -78,9 +74,7 @@ const Navbar = () => {
                 to={link.href}
                 className={cn(
                   "px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
-                  isActive(link.href)
-                    ? "text-accent bg-accent/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  isActive(link.href) ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
               >
                 {link.label}
@@ -89,17 +83,23 @@ const Navbar = () => {
           )}
         </div>
 
-        <Link to="/contact" className="hidden md:block">
-          <button className="bg-accent text-accent-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent/90 transition-all shadow-sm hover:shadow-glow">
-            Demander un Devis
+        <div className="hidden md:flex items-center gap-3">
+          {/* Language switcher */}
+          <button
+            onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <Globe className="h-4 w-4" />
+            {lang === "fr" ? "EN" : "FR"}
           </button>
-        </Link>
+          <Link to="/contact">
+            <button className="bg-accent text-accent-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-accent/90 transition-all shadow-sm hover:shadow-glow">
+              {lang === "en" ? "Request a Quote" : "Demander un Devis"}
+            </button>
+          </Link>
+        </div>
 
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden p-2 text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
+        <button className="md:hidden p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
@@ -110,25 +110,13 @@ const Navbar = () => {
           <div className="container py-4 space-y-1">
             {navLinks.map((link) => (
               <div key={link.label}>
-                <Link
-                  to={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "block px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                    isActive(link.href) ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  )}
-                >
+                <Link to={link.href} onClick={() => setMobileOpen(false)} className={cn("block px-4 py-3 rounded-lg text-sm font-medium transition-colors", isActive(link.href) ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-muted")}>
                   {link.label}
                 </Link>
                 {link.children && (
                   <div className="ml-4 space-y-0.5">
                     {link.children.map((child) => (
-                      <Link
-                        key={child.label}
-                        to={child.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg"
-                      >
+                      <Link key={child.label} to={child.href} onClick={() => setMobileOpen(false)} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg">
                         {child.label}
                       </Link>
                     ))}
@@ -136,9 +124,12 @@ const Navbar = () => {
                 )}
               </div>
             ))}
+            <button onClick={() => { setLang(lang === "fr" ? "en" : "fr"); }} className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:text-foreground">
+              <Globe className="h-4 w-4" /> {lang === "fr" ? "English" : "Français"}
+            </button>
             <Link to="/contact" onClick={() => setMobileOpen(false)}>
               <button className="w-full mt-3 bg-accent text-accent-foreground px-5 py-3 rounded-lg text-sm font-semibold">
-                Demander un Devis
+                {lang === "en" ? "Request a Quote" : "Demander un Devis"}
               </button>
             </Link>
           </div>
