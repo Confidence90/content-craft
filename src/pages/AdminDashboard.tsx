@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FileText, Settings2, MessageSquare, LogOut, Menu, X, ChevronRight } from "lucide-react";
+import { Navigate, Link } from "react-router-dom";
+import { LayoutDashboard, FileText, Settings2, MessageSquare, LogOut, Menu, X, ChevronRight, Blocks } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AdminContent from "@/components/admin/AdminContent";
+import AdminPageBuilder from "@/components/admin/AdminPageBuilder";
 import AdminServices from "@/components/admin/AdminServices";
 import AdminMessages from "@/components/admin/AdminMessages";
 import AdminOverview from "@/components/admin/AdminOverview";
 
 const tabs = [
   { id: "overview", label: "Aperçu", icon: LayoutDashboard },
-  { id: "content", label: "Contenu", icon: FileText },
+  { id: "builder", label: "Pages", icon: Blocks },
   { id: "services", label: "Services", icon: Settings2 },
   { id: "messages", label: "Messages", icon: MessageSquare },
 ];
@@ -23,11 +23,10 @@ const AdminDashboard = () => {
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-muted-foreground">Chargement...</p></div>;
   if (!user || !isAdmin) return <Navigate to="/admin/login" replace />;
 
-  const tabLabels: Record<string, string> = { overview: "Aperçu", content: "Contenu", services: "Services", messages: "Messages" };
+  const tabLabels: Record<string, string> = { overview: "Aperçu", builder: "Pages", services: "Services", messages: "Messages" };
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 lg:translate-x-0 lg:static ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-5 border-b border-border">
           <Link to="/" className="flex items-center gap-2">
@@ -67,10 +66,8 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 bg-foreground/20 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-h-screen">
         <header className="h-14 border-b border-border bg-card flex items-center px-4 lg:px-6 gap-4">
           <button className="lg:hidden text-foreground" onClick={() => setSidebarOpen(true)}>
@@ -84,7 +81,7 @@ const AdminDashboard = () => {
         </header>
         <main className="flex-1 p-4 lg:p-6 overflow-auto">
           {activeTab === "overview" && <AdminOverview onNavigate={setActiveTab} />}
-          {activeTab === "content" && <AdminContent />}
+          {activeTab === "builder" && <AdminPageBuilder />}
           {activeTab === "services" && <AdminServices />}
           {activeTab === "messages" && <AdminMessages />}
         </main>

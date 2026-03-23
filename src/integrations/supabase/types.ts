@@ -56,6 +56,101 @@ export type Database = {
         }
         Relationships: []
       }
+      content_blocks: {
+        Row: {
+          block_type: string
+          content_en: string | null
+          content_fr: string | null
+          created_at: string
+          id: string
+          is_visible: boolean | null
+          media_url: string | null
+          metadata: Json | null
+          section_id: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          block_type?: string
+          content_en?: string | null
+          content_fr?: string | null
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          media_url?: string | null
+          metadata?: Json | null
+          section_id: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          block_type?: string
+          content_en?: string | null
+          content_fr?: string | null
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          media_url?: string | null
+          metadata?: Json | null
+          section_id?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_blocks_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "page_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_sections: {
+        Row: {
+          bg_variant: string | null
+          created_at: string
+          id: string
+          is_visible: boolean | null
+          page: string
+          section_key: string
+          sort_order: number | null
+          subtitle_en: string | null
+          subtitle_fr: string | null
+          title_en: string | null
+          title_fr: string | null
+          updated_at: string
+        }
+        Insert: {
+          bg_variant?: string | null
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          page: string
+          section_key: string
+          sort_order?: number | null
+          subtitle_en?: string | null
+          subtitle_fr?: string | null
+          title_en?: string | null
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bg_variant?: string | null
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          page?: string
+          section_key?: string
+          sort_order?: number | null
+          subtitle_en?: string | null
+          subtitle_fr?: string | null
+          title_en?: string | null
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string | null
