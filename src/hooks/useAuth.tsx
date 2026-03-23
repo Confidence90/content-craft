@@ -32,6 +32,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const isEmbeddedContext = () => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
+  };
+
   const queryAdminRole = async (userId: string) => {
     return supabase
       .from("user_roles")
@@ -63,11 +72,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    if (!isStorageAccessible()) {
+    const conservativeSessionMode = !isStorageAccessible() || isEmbeddedContext();
+
+    if (conservativeSessionMode) {
       supabase.auth.stopAutoRefresh();
     }
 
-    const applySession = async (nextSession: Session | null) => {
+    const applySession = async (nextSession: Session | null, shouldCheckRole: boolean) => {
       const checkId = ++latestSessionCheckRef.current;
       if (!mounted) return;
 
@@ -79,15 +90,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      if (!shouldCheckRole) return;
+
       const admin = await checkAdmin(nextSession.user.id);
       if (mounted && checkId === latestSessionCheckRef.current) setIsAdmin(admin);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       const shouldBlockUI = event !== "TOKEN_REFRESHED";
+      const shouldCheckRole = event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "USER_UPDATED";
+
+      if (event === "TOKEN_REFRESHED" && conservativeSessionMode) {
+        return;
+      }
+
       if (shouldBlockUI) setLoading(true);
 
-      void applySession(nextSession).finally(() => {
+      void applySession(nextSession, shouldCheckRole).finally(() => {
         if (mounted && shouldBlockUI) setLoading(false);
       });
     });
@@ -96,9 +115,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     void supabase.auth.getSession()
       .then(async ({ data, error }) => {
         if (error) throw error;
-        await applySession(data.session);
+        await applySession(data.session, true);
       })
       .catch(() => {
+        void supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
         if (!mounted) return;
         setSession(null);
         setUser(null);
@@ -115,12 +135,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     setSession(null);
     setUser(null);
     setIsAdmin(false);
