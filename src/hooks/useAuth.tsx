@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,16 +18,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const latestSessionCheckRef = useRef(0);
 
-  const checkAdmin = async (userId: string): Promise<boolean> => {
-    const { data, error } = await supabase
+  const isStorageAccessible = () => {
+    if (typeof window === "undefined") return false;
+    try {
+      const key = "__auth_storage_test__";
+      window.localStorage.setItem(key, "1");
+      window.localStorage.removeItem(key);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const queryAdminRole = async (userId: string) => {
+    return supabase
       .from("user_roles")
       .select("id")
       .eq("user_id", userId)
       .eq("role", "admin")
       .limit(1);
+  };
 
-    if (!error) return (data?.length ?? 0) > 0;
+  const checkAdmin = async (userId: string): Promise<boolean> => {
+    const { data, error } = await queryAdminRole(userId);
+    if (!error && (data?.length ?? 0) > 0) return true;
+
+    if (!error && (data?.length ?? 0) === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const { data: retryData, error: retryError } = await queryAdminRole(userId);
+      if (!retryError) return (retryData?.length ?? 0) > 0;
+    }
 
     const { data: fallback, error: fallbackError } = await supabase.rpc("has_role", {
       _user_id: userId,
@@ -41,7 +63,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
+    if (!isStorageAccessible()) {
+      supabase.auth.stopAutoRefresh();
+    }
+
     const applySession = async (nextSession: Session | null) => {
+      const checkId = ++latestSessionCheckRef.current;
       if (!mounted) return;
 
       setSession(nextSession);
@@ -53,13 +80,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const admin = await checkAdmin(nextSession.user.id);
-      if (mounted) setIsAdmin(admin);
+      if (mounted && checkId === latestSessionCheckRef.current) setIsAdmin(admin);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setLoading(true);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      const shouldBlockUI = event !== "TOKEN_REFRESHED";
+      if (shouldBlockUI) setLoading(true);
+
       void applySession(nextSession).finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted && shouldBlockUI) setLoading(false);
       });
     });
 
