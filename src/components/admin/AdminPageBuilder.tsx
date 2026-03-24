@@ -53,6 +53,8 @@ const BLOCK_TYPES = [
   { value: "contact_info", label: "Info Contact", icon: Phone },
 ];
 
+const CMS_UPDATE_KEY = "cms_last_update";
+
 const AdminPageBuilder = () => {
   const { toast } = useToast();
   const [sections, setSections] = useState<PageSection[]>([]);
@@ -64,6 +66,15 @@ const AdminPageBuilder = () => {
   const [showAddBlock, setShowAddBlock] = useState<string | null>(null);
   const [newSection, setNewSection] = useState({ section_key: "", title_fr: "", title_en: "", subtitle_fr: "", subtitle_en: "", bg_variant: "default" });
   const [newBlock, setNewBlock] = useState<Partial<ContentBlock>>({ block_type: "text", content_fr: "", content_en: "", media_url: "", metadata: {}, sort_order: 0 });
+
+  const notifyContentUpdate = () => {
+    window.dispatchEvent(new CustomEvent("page-content-updated"));
+    try {
+      localStorage.setItem(CMS_UPDATE_KEY, String(Date.now()));
+    } catch {
+      // Storage can be blocked by browser privacy settings.
+    }
+  };
 
   const fetchSections = useCallback(async () => {
     setLoading(true);
@@ -107,12 +118,14 @@ const AdminPageBuilder = () => {
     toast({ title: "Section ajoutée" });
     setShowAddSection(false);
     setNewSection({ section_key: "", title_fr: "", title_en: "", subtitle_fr: "", subtitle_en: "", bg_variant: "default" });
+    notifyContentUpdate();
     fetchSections();
   };
 
   const handleDeleteSection = async (id: string) => {
     await supabase.from("page_sections").delete().eq("id", id);
     toast({ title: "Section supprimée" });
+    notifyContentUpdate();
     fetchSections();
   };
 
@@ -124,6 +137,7 @@ const AdminPageBuilder = () => {
     }).eq("id", section.id);
     if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
     toast({ title: "Section mise à jour" });
+    notifyContentUpdate();
     fetchSections();
   };
 
@@ -136,6 +150,7 @@ const AdminPageBuilder = () => {
       supabase.from("page_sections").update({ sort_order: b.sort_order }).eq("id", a.id),
       supabase.from("page_sections").update({ sort_order: a.sort_order }).eq("id", b.id),
     ]);
+    notifyContentUpdate();
     fetchSections();
   };
 
@@ -155,6 +170,7 @@ const AdminPageBuilder = () => {
     toast({ title: "Bloc ajouté" });
     setShowAddBlock(null);
     setNewBlock({ block_type: "text", content_fr: "", content_en: "", media_url: "", metadata: {}, sort_order: 0 });
+    notifyContentUpdate();
     fetchSections();
   };
 
@@ -167,12 +183,14 @@ const AdminPageBuilder = () => {
     if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
     toast({ title: "Bloc mis à jour" });
     setEditingBlock(null);
+    notifyContentUpdate();
     fetchSections();
   };
 
   const handleDeleteBlock = async (id: string) => {
     await supabase.from("content_blocks").delete().eq("id", id);
     toast({ title: "Bloc supprimé" });
+    notifyContentUpdate();
     fetchSections();
   };
 
@@ -188,6 +206,7 @@ const AdminPageBuilder = () => {
       supabase.from("content_blocks").update({ sort_order: b.sort_order }).eq("id", a.id),
       supabase.from("content_blocks").update({ sort_order: a.sort_order }).eq("id", b.id),
     ]);
+    notifyContentUpdate();
     fetchSections();
   };
 
