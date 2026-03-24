@@ -27,6 +27,9 @@ const Index = () => {
   const testimonials = getSection("testimonials");
   const cta = getSection("cta");
 
+  const knownKeys = ["hero", "about", "services_preview", "testimonials", "cta"];
+  const dynamicSections = sections.filter(s => !knownKeys.includes(s.section_key));
+
   const heroBadge = hero?.blocks.find(b => b.block_type === "text" && b.metadata?.variant === "badge");
   const heroCtas = hero?.blocks.filter(b => b.block_type === "cta") || [];
   const aboutStats = about?.blocks.filter(b => b.block_type === "stat") || [];
