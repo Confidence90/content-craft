@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { usePageContent } from "@/hooks/usePageContent";
 import { useLanguage } from "@/hooks/useLanguage";
-import { CardBlock } from "@/components/blocks/BlockRenderer";
+import { BlockRenderer, CardBlock } from "@/components/blocks/BlockRenderer";
 
 const Solutions = () => {
   const { sections, loading, getSection } = usePageContent("solutions");
