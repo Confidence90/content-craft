@@ -5,7 +5,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { BlockRenderer, CardBlock, TeamMemberBlock } from "@/components/blocks/BlockRenderer";
 
 const Presentation = () => {
-  const { loading, getSection } = usePageContent("presentation");
+  const { sections, loading, getSection } = usePageContent("presentation");
   const { t, lang } = useLanguage();
 
   if (loading) return <div className="flex min-h-[50vh] items-center justify-center"><p className="text-muted-foreground">{lang === "en" ? "Loading..." : "Chargement..."}</p></div>;
@@ -15,6 +15,9 @@ const Presentation = () => {
   const vision = getSection("vision");
   const values = getSection("values");
   const team = getSection("team");
+
+  const knownKeys = ["hero", "mission", "vision", "values", "team"];
+  const dynamicSections = sections.filter(s => !knownKeys.includes(s.section_key));
 
   return (
     <div>
