@@ -91,6 +91,26 @@ const Presentation = () => {
           </div>
         </section>
       )}
+      {/* Dynamic Sections */}
+      {dynamicSections.map((section) => (
+        <section key={section.id} className={`py-24 ${section.bg_variant === "dark" ? "bg-primary text-primary-foreground" : section.bg_variant === "accent" ? "bg-secondary/50" : "bg-background"}`}>
+          <div className="container">
+            {(section.title_fr || section.title_en) && (
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center max-w-2xl mx-auto mb-12">
+                <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">{t(section.title_fr, section.title_en)}</h2>
+                {(section.subtitle_fr || section.subtitle_en) && <p className="text-muted-foreground">{t(section.subtitle_fr, section.subtitle_en)}</p>}
+              </motion.div>
+            )}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {section.blocks.map((block, i) => (
+                <motion.div key={block.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
+                  <BlockRenderer block={block} index={i} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
     </div>
   );
 };
