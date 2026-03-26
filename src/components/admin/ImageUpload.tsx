@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
@@ -33,27 +33,25 @@ const ImageUpload = ({ value, onChange, folder = "general", label = "Image" }: I
     }
 
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
 
-    const { error } = await supabase.storage.from("media").upload(fileName, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", folder);
 
-    if (error) {
-      toast({ title: "Erreur lors de l'upload", description: error.message, variant: "destructive" });
+      const { data } = await api.post("/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const publicUrl = data.url || data.fileUrl || data.path;
+      setPreview(publicUrl);
+      onChange(publicUrl);
+      toast({ title: "Image uploadée avec succès" });
+    } catch (err: any) {
+      toast({ title: "Erreur lors de l'upload", description: err.response?.data?.message || err.message, variant: "destructive" });
+    } finally {
       setUploading(false);
-      return;
     }
-
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
-    const publicUrl = urlData.publicUrl;
-
-    setPreview(publicUrl);
-    onChange(publicUrl);
-    setUploading(false);
-    toast({ title: "Image uploadée avec succès" });
   };
 
   const handleRemove = () => {

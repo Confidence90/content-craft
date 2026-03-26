@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import api from "@/services/api";
 import { usePageContent } from "@/hooks/usePageContent";
 import { useLanguage } from "@/hooks/useLanguage";
 import { ContactInfoBlock } from "@/components/blocks/BlockRenderer";
@@ -30,15 +30,19 @@ const Contact = () => {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("contact_messages").insert({
-      company: formData.company || null, name: formData.name, position: formData.position || null,
-      email: formData.email, phone: formData.phone || null, address: formData.address || null,
-      subject: formData.subject || null, message: formData.message,
-    });
-    setSubmitting(false);
-    if (error) { toast({ title: lang === "en" ? "Error sending" : "Erreur lors de l'envoi", variant: "destructive" }); return; }
-    toast({ title: lang === "en" ? "Message sent!" : "Message envoyé !", description: lang === "en" ? "We'll respond within 24 hours." : "Nous vous répondrons dans les 24 heures." });
-    setFormData({ company: "", name: "", position: "", email: "", phone: "", address: "", subject: "", message: "" });
+    try {
+      await api.post("/contact-messages", {
+        company: formData.company || null, name: formData.name, position: formData.position || null,
+        email: formData.email, phone: formData.phone || null, address: formData.address || null,
+        subject: formData.subject || null, message: formData.message,
+      });
+      toast({ title: lang === "en" ? "Message sent!" : "Message envoyé !", description: lang === "en" ? "We'll respond within 24 hours." : "Nous vous répondrons dans les 24 heures." });
+      setFormData({ company: "", name: "", position: "", email: "", phone: "", address: "", subject: "", message: "" });
+    } catch {
+      toast({ title: lang === "en" ? "Error sending" : "Erreur lors de l'envoi", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const hero = getSection("hero");
