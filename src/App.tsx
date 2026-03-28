@@ -3,10 +3,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import Layout from "@/components/layout/Layout";
-import ProtectedRoute from "@/routes/ProtectedRoute";
 import Index from "./pages/Index";
 import Presentation from "./pages/Presentation";
 import Services from "./pages/Services";
@@ -28,7 +27,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/" element={<Layout><Index /></Layout>} />
               <Route path="/presentation" element={<Layout><Presentation /></Layout>} />
               <Route path="/services" element={<Layout><Services /></Layout>} />

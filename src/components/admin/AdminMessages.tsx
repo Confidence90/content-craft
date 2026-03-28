@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "@/services/api";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Mail, Trash2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,36 +25,23 @@ const AdminMessages = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fetchMessages = async () => {
-    try {
-      const { data } = await api.get("/contact-messages");
-      setMessages((data.messages || data || []) as Message[]);
-    } catch {
-      setMessages([]);
-    } finally {
-      setLoading(false);
-    }
+    const { data } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
+    setMessages((data as Message[]) ?? []);
+    setLoading(false);
   };
 
   useEffect(() => { fetchMessages(); }, []);
 
   const toggleRead = async (msg: Message) => {
-    try {
-      await api.put(`/contact-messages/${msg.id}`, { is_read: !msg.is_read });
-      fetchMessages();
-    } catch {
-      toast({ title: "Erreur", variant: "destructive" });
-    }
+    await supabase.from("contact_messages").update({ is_read: !msg.is_read }).eq("id", msg.id);
+    fetchMessages();
   };
 
   const handleDelete = async (id: string) => {
-    try {
-      await api.delete(`/contact-messages/${id}`);
-      toast({ title: "Message supprimé" });
-      if (selectedId === id) setSelectedId(null);
-      fetchMessages();
-    } catch {
-      toast({ title: "Erreur", variant: "destructive" });
-    }
+    await supabase.from("contact_messages").delete().eq("id", id);
+    toast({ title: "Message supprimé" });
+    if (selectedId === id) setSelectedId(null);
+    fetchMessages();
   };
 
   const selected = messages.find((m) => m.id === selectedId);
@@ -72,6 +59,7 @@ const AdminMessages = () => {
         </div>
       ) : (
         <div className="grid lg:grid-cols-5 gap-6">
+          {/* Liste des messages */}
           <div className="lg:col-span-2 space-y-2 max-h-[70vh] overflow-auto">
             {messages.map((msg) => (
               <button
@@ -79,10 +67,8 @@ const AdminMessages = () => {
                 onClick={async () => {
                   setSelectedId(msg.id);
                   if (!msg.is_read) {
-                    try {
-                      await api.put(`/contact-messages/${msg.id}`, { is_read: true });
-                      fetchMessages();
-                    } catch {}
+                    await supabase.from("contact_messages").update({ is_read: true }).eq("id", msg.id);
+                    fetchMessages();
                   }
                 }}
                 className={`w-full text-left p-4 rounded-xl border transition-colors ${
@@ -100,6 +86,7 @@ const AdminMessages = () => {
             ))}
           </div>
 
+          {/* Détail du message */}
           <div className="lg:col-span-3">
             {selected ? (
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Link } from "react-router-dom";
-import { LayoutDashboard, Settings2, MessageSquare, LogOut, Menu, X, ChevronRight, Blocks } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate, Link } from "react-router-dom";
+import { LayoutDashboard, FileText, Settings2, MessageSquare, LogOut, Menu, X, ChevronRight, Blocks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminPageBuilder from "@/components/admin/AdminPageBuilder";
 import AdminServices from "@/components/admin/AdminServices";
@@ -16,9 +16,12 @@ const tabs = [
 ];
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, loading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-muted-foreground">Chargement...</p></div>;
+  if (!user || !isAdmin) return <Navigate to="/admin/login" replace />;
 
   const tabLabels: Record<string, string> = { overview: "Aperçu", builder: "Pages", services: "Services", messages: "Messages" };
 
@@ -51,12 +54,12 @@ const AdminDashboard = () => {
           ))}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-          <div className="text-xs text-muted-foreground mb-3 truncate">{user?.email || user?.username}</div>
+          <div className="text-xs text-muted-foreground mb-3 truncate">{user.email}</div>
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm" className="flex-1">
               <Link to="/">Voir le Site</Link>
             </Button>
-            <Button variant="ghost" size="sm" onClick={logout}>
+            <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4" />
             </Button>
           </div>

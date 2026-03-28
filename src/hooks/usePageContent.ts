@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "@/services/api";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ContentBlock {
   id: string;
@@ -32,22 +32,41 @@ export const usePageContent = (page: string) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetch = async () => {
       setLoading(true);
-      try {
-        const { data } = await api.get(`/pages/${page}/sections`);
-        const sectionData: PageSection[] = (data.sections || data || []).map((s: any) => ({
-          ...s,
-          blocks: (s.blocks || []).map((b: any) => ({ ...b, metadata: b.metadata || {} })),
-        }));
-        setSections(sectionData);
-      } catch {
+      const { data: sectionData } = await supabase
+        .from("page_sections")
+        .select("*")
+        .eq("page", page)
+        .eq("is_visible", true)
+        .order("sort_order");
+
+      if (!sectionData || sectionData.length === 0) {
         setSections([]);
-      } finally {
         setLoading(false);
+        return;
       }
+
+      const sectionIds = sectionData.map((s: any) => s.id);
+      const { data: blockData } = await supabase
+        .from("content_blocks")
+        .select("*")
+        .in("section_id", sectionIds)
+        .eq("is_visible", true)
+        .order("sort_order");
+
+      const result: PageSection[] = sectionData.map((s: any) => ({
+        ...s,
+        metadata: {},
+        blocks: (blockData || [])
+          .filter((b: any) => b.section_id === s.id)
+          .map((b: any) => ({ ...b, metadata: b.metadata || {} })),
+      }));
+
+      setSections(result);
+      setLoading(false);
     };
-    fetchData();
+    fetch();
   }, [page]);
 
   const getSection = (key: string) => sections.find((s) => s.section_key === key);

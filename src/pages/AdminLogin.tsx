@@ -1,30 +1,27 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, User } from "lucide-react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Lock, Mail } from "lucide-react";
+import { Navigate } from "react-router-dom";
 
 const AdminLogin = () => {
-  const { login, isAdmin, loading, isAuthenticated, user } = useAuth();
-  const navigate = useNavigate();
-  const [identifier, setIdentifier] = useState("");
+  const { signIn, isAdmin, loading, user } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-muted-foreground">Chargement...</p></div>;
-  if (isAuthenticated && isAdmin) return <Navigate to="/admin" replace />;
+  if (user && isAdmin) return <Navigate to="/admin" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
-    const result = await login(identifier, password);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      navigate("/admin", { replace: true });
+    const { error } = await signIn(email, password);
+    if (error) {
+      setError("Identifiants invalides");
     }
     setSubmitting(false);
   };
@@ -41,7 +38,7 @@ const AdminLogin = () => {
             <p className="text-sm text-muted-foreground mt-1">Connectez-vous pour gérer votre site</p>
           </div>
 
-          {isAuthenticated && !isAdmin && (
+          {user && !isAdmin && (
             <div className="bg-destructive/10 text-destructive text-sm rounded-lg p-3 mb-4 text-center">
               Vous n'avez pas les privilèges administrateur.
             </div>
@@ -49,33 +46,17 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Email ou Nom d'utilisateur</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-10"
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="email@exemple.com ou username"
-                  required
-                  autoComplete="username"
-                />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input className="pl-10" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@exemple.com" required />
               </div>
             </div>
             <div>
               <label className="text-sm font-medium text-foreground mb-1.5 block">Mot de passe</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-10"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                />
+                <Input className="pl-10" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
               </div>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
