@@ -1,31 +1,17 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { FileText, Settings2, MessageSquare, Eye } from "lucide-react";
+import { mockSiteContent, mockServices, mockMessages } from "@/data/mockData";
 
 interface AdminOverviewProps {
   onNavigate: (tab: string) => void;
 }
 
 const AdminOverview = ({ onNavigate }: AdminOverviewProps) => {
-  const [stats, setStats] = useState({ content: 0, services: 0, messages: 0, unread: 0 });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      const [contentRes, servicesRes, messagesRes, unreadRes] = await Promise.all([
-        supabase.from("site_content").select("id", { count: "exact", head: true }),
-        supabase.from("services").select("id", { count: "exact", head: true }),
-        supabase.from("contact_messages").select("id", { count: "exact", head: true }),
-        supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
-      ]);
-      setStats({
-        content: contentRes.count ?? 0,
-        services: servicesRes.count ?? 0,
-        messages: messagesRes.count ?? 0,
-        unread: unreadRes.count ?? 0,
-      });
-    };
-    fetchStats();
-  }, []);
+  const stats = {
+    content: mockSiteContent.length,
+    services: mockServices.length,
+    messages: mockMessages.length,
+    unread: mockMessages.filter(m => !m.is_read).length,
+  };
 
   const cards = [
     { label: "Éléments de Contenu", value: stats.content, icon: FileText, tab: "content", color: "text-blue-500" },

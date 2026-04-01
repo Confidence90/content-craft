@@ -1,154 +1,70 @@
-import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { mockAdminUser, MockUser } from "@/data/mockData";
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: MockUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
   isAdmin: boolean;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (identifier: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<MockUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const latestSessionCheckRef = useRef(0);
 
-  const isStorageAccessible = () => {
-    if (typeof window === "undefined") return false;
-    try {
-      const key = "__auth_storage_test__";
-      window.localStorage.setItem(key, "1");
-      window.localStorage.removeItem(key);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  const isAuthenticated = !!user && !!accessToken;
+  const isAdmin = user?.role === "ADMIN";
 
-  const isEmbeddedContext = () => {
-    if (typeof window === "undefined") return false;
-    try {
-      return window.self !== window.top;
-    } catch {
-      return true;
-    }
-  };
-
-  const queryAdminRole = async (userId: string) => {
-    return supabase
-      .from("user_roles")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .limit(1);
-  };
-
-  const checkAdmin = async (userId: string): Promise<boolean> => {
-    const { data, error } = await queryAdminRole(userId);
-    if (!error && (data?.length ?? 0) > 0) return true;
-
-    if (!error && (data?.length ?? 0) === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      const { data: retryData, error: retryError } = await queryAdminRole(userId);
-      if (!retryError) return (retryData?.length ?? 0) > 0;
-    }
-
-    const { data: fallback, error: fallbackError } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-
-    if (fallbackError) return false;
-    return !!fallback;
-  };
-
+  // Restore session on mount
   useEffect(() => {
-    let mounted = true;
-
-    const conservativeSessionMode = !isStorageAccessible() || isEmbeddedContext();
-
-    if (conservativeSessionMode) {
-      supabase.auth.stopAutoRefresh();
+    const storedToken = localStorage.getItem("accessToken");
+    const storedRefresh = localStorage.getItem("refreshToken");
+    if (storedToken) {
+      // In mock mode, restore the admin user
+      setUser(mockAdminUser);
+      setAccessToken(storedToken);
+      setRefreshToken(storedRefresh);
     }
-
-    const applySession = async (nextSession: Session | null, shouldCheckRole: boolean) => {
-      const checkId = ++latestSessionCheckRef.current;
-      if (!mounted) return;
-
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
-
-      if (!nextSession?.user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      if (!shouldCheckRole) return;
-
-      const admin = await checkAdmin(nextSession.user.id);
-      if (mounted && checkId === latestSessionCheckRef.current) setIsAdmin(admin);
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      const shouldBlockUI = event !== "TOKEN_REFRESHED";
-      const shouldCheckRole = event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "USER_UPDATED";
-
-      if (event === "TOKEN_REFRESHED" && conservativeSessionMode) {
-        return;
-      }
-
-      if (shouldBlockUI) setLoading(true);
-
-      void applySession(nextSession, shouldCheckRole).finally(() => {
-        if (mounted && shouldBlockUI) setLoading(false);
-      });
-    });
-
-    setLoading(true);
-    void supabase.auth.getSession()
-      .then(async ({ data, error }) => {
-        if (error) throw error;
-        await applySession(data.session, true);
-      })
-      .catch(() => {
-        void supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
-        if (!mounted) return;
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    setLoading(false);
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    return { error: error as Error | null };
+  const signIn = async (identifier: string, password: string): Promise<{ error: Error | null }> => {
+    // Mock authentication — accepts admin@techcorp.com / admin / Admin123!
+    // When backend is connected, replace with: api.post("/connexion", { identifier, password })
+    if (
+      (identifier === mockAdminUser.email || identifier === mockAdminUser.username) &&
+      password === "Admin123!"
+    ) {
+      const mockAccessToken = "mock-access-token-" + Date.now();
+      const mockRefreshToken = "mock-refresh-token-" + Date.now();
+      localStorage.setItem("accessToken", mockAccessToken);
+      localStorage.setItem("refreshToken", mockRefreshToken);
+      setAccessToken(mockAccessToken);
+      setRefreshToken(mockRefreshToken);
+      setUser(mockAdminUser);
+      return { error: null };
+    }
+    return { error: new Error("Identifiants invalides") };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut({ scope: "local" });
-    setSession(null);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     setUser(null);
-    setIsAdmin(false);
+    setAccessToken(null);
+    setRefreshToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, accessToken, refreshToken, isAuthenticated, isAdmin, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,47 +1,22 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Mail, Trash2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface Message {
-  id: string;
-  company: string | null;
-  name: string;
-  position: string | null;
-  email: string;
-  phone: string | null;
-  address: string | null;
-  subject: string | null;
-  message: string;
-  is_read: boolean | null;
-  created_at: string;
-}
+import { mockMessages, MockMessage } from "@/data/mockData";
 
 const AdminMessages = () => {
   const { toast } = useToast();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [messages, setMessages] = useState<MockMessage[]>(mockMessages);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const fetchMessages = async () => {
-    const { data } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
-    setMessages((data as Message[]) ?? []);
-    setLoading(false);
+  const toggleRead = (msg: MockMessage) => {
+    setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, is_read: !m.is_read } : m));
   };
 
-  useEffect(() => { fetchMessages(); }, []);
-
-  const toggleRead = async (msg: Message) => {
-    await supabase.from("contact_messages").update({ is_read: !msg.is_read }).eq("id", msg.id);
-    fetchMessages();
-  };
-
-  const handleDelete = async (id: string) => {
-    await supabase.from("contact_messages").delete().eq("id", id);
-    toast({ title: "Message supprimé" });
+  const handleDelete = (id: string) => {
+    setMessages(prev => prev.filter(m => m.id !== id));
     if (selectedId === id) setSelectedId(null);
-    fetchMessages();
+    toast({ title: "Message supprimé" });
   };
 
   const selected = messages.find((m) => m.id === selectedId);
@@ -50,25 +25,21 @@ const AdminMessages = () => {
     <div>
       <h1 className="text-2xl font-heading font-bold text-foreground mb-6">Messages de Contact</h1>
 
-      {loading ? (
-        <p className="text-muted-foreground">Chargement...</p>
-      ) : messages.length === 0 ? (
+      {messages.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Mail className="h-10 w-10 mx-auto mb-3 opacity-40" />
           <p>Aucun message pour le moment.</p>
         </div>
       ) : (
         <div className="grid lg:grid-cols-5 gap-6">
-          {/* Liste des messages */}
           <div className="lg:col-span-2 space-y-2 max-h-[70vh] overflow-auto">
             {messages.map((msg) => (
               <button
                 key={msg.id}
-                onClick={async () => {
+                onClick={() => {
                   setSelectedId(msg.id);
                   if (!msg.is_read) {
-                    await supabase.from("contact_messages").update({ is_read: true }).eq("id", msg.id);
-                    fetchMessages();
+                    setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, is_read: true } : m));
                   }
                 }}
                 className={`w-full text-left p-4 rounded-xl border transition-colors ${
@@ -86,7 +57,6 @@ const AdminMessages = () => {
             ))}
           </div>
 
-          {/* Détail du message */}
           <div className="lg:col-span-3">
             {selected ? (
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">

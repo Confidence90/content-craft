@@ -1,82 +1,51 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ImageUpload from "@/components/admin/ImageUpload";
-
-interface Service {
-  id: string;
-  title: string;
-  description: string | null;
-  icon: string | null;
-  category: string | null;
-  features: string[] | null;
-  sort_order: number | null;
-  is_active: boolean | null;
-}
+import { mockServices, MockService } from "@/data/mockData";
 
 const ICONS = ["Globe", "Smartphone", "Monitor", "Server", "Shield", "Code", "Zap", "BarChart3", "Cloud", "Lock", "Layers", "Cpu"];
 
 const AdminServices = () => {
   const { toast } = useToast();
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<MockService[]>(mockServices);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newService, setNewService] = useState({ title: "", description: "", icon: "Code", category: "", features: "" });
 
-  const fetchServices = async () => {
-    const { data } = await supabase.from("services").select("*").order("sort_order");
-    setServices((data as Service[]) ?? []);
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchServices(); }, []);
-
-  const handleAdd = async () => {
+  const handleAdd = () => {
     if (!newService.title) { toast({ title: "Le titre est requis", variant: "destructive" }); return; }
-    const { error } = await supabase.from("services").insert({
+    const svc: MockService = {
+      id: "svc-" + Date.now(),
       title: newService.title,
       description: newService.description,
       icon: newService.icon,
       category: newService.category,
       features: newService.features.split(",").map((f) => f.trim()).filter(Boolean),
       sort_order: services.length + 1,
-    });
-    if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
+      is_active: true,
+    };
+    setServices(prev => [...prev, svc]);
     toast({ title: "Service ajouté" });
     setShowAdd(false);
     setNewService({ title: "", description: "", icon: "Code", category: "", features: "" });
-    fetchServices();
   };
 
-  const handleSave = async (service: Service) => {
-    const { error } = await supabase.from("services").update({
-      title: service.title,
-      description: service.description,
-      icon: service.icon,
-      category: service.category,
-      features: service.features,
-      is_active: service.is_active,
-    }).eq("id", service.id);
-    if (error) { toast({ title: "Erreur lors de la sauvegarde", variant: "destructive" }); return; }
+  const handleSave = (service: MockService) => {
+    setServices(prev => prev.map(s => s.id === service.id ? service : s));
     toast({ title: "Service mis à jour" });
     setEditingId(null);
-    fetchServices();
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("services").delete().eq("id", id);
+  const handleDelete = (id: string) => {
+    setServices(prev => prev.filter(s => s.id !== id));
     toast({ title: "Service supprimé" });
-    fetchServices();
   };
 
-  const toggleActive = async (service: Service) => {
-    await supabase.from("services").update({ is_active: !service.is_active }).eq("id", service.id);
-    fetchServices();
+  const toggleActive = (service: MockService) => {
+    setServices(prev => prev.map(s => s.id === service.id ? { ...s, is_active: !s.is_active } : s));
   };
 
   return (
@@ -102,12 +71,6 @@ const AdminServices = () => {
             </select>
             <Input placeholder="Fonctionnalités (séparées par des virgules)" value={newService.features} onChange={(e) => setNewService({ ...newService, features: e.target.value })} />
           </div>
-          <ImageUpload
-            value=""
-            onChange={() => {}}
-            folder="services"
-            label="Image du service (optionnel)"
-          />
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd}><Save className="h-4 w-4" /> Enregistrer</Button>
             <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>Annuler</Button>
@@ -115,64 +78,60 @@ const AdminServices = () => {
         </div>
       )}
 
-      {loading ? (
-        <p className="text-muted-foreground">Chargement...</p>
-      ) : (
-        <div className="space-y-3">
-          {services.map((service) => (
-            <div key={service.id} className={`bg-card rounded-xl p-5 shadow-card border border-border ${!service.is_active ? "opacity-50" : ""}`}>
-              {editingId === service.id ? (
-                <div className="space-y-3">
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <Input value={service.title} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, title: e.target.value } : s))} />
-                    <Input value={service.category ?? ""} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, category: e.target.value } : s))} />
-                  </div>
-                  <Textarea value={service.description ?? ""} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, description: e.target.value } : s))} />
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <select className="rounded-lg border border-input bg-background px-3 py-2 text-sm" value={service.icon ?? "Code"} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, icon: e.target.value } : s))}>
-                      {ICONS.map((i) => <option key={i} value={i}>{i}</option>)}
-                    </select>
-                    <Input value={(service.features ?? []).join(", ")} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, features: e.target.value.split(",").map((f) => f.trim()) } : s))} placeholder="Fonctionnalités (séparées par des virgules)" />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSave(service)}><Save className="h-4 w-4" /> Enregistrer</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchServices(); }}>Annuler</Button>
-                  </div>
+      <div className="space-y-3">
+        {services.map((service) => (
+          <div key={service.id} className={`bg-card rounded-xl p-5 shadow-card border border-border ${!service.is_active ? "opacity-50" : ""}`}>
+            {editingId === service.id ? (
+              <div className="space-y-3">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Input value={service.title} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, title: e.target.value } : s))} />
+                  <Input value={service.category ?? ""} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, category: e.target.value } : s))} />
                 </div>
-              ) : (
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-heading font-semibold text-foreground">{service.title}</span>
-                      <span className="text-xs text-muted-foreground">({service.icon})</span>
-                      {service.category && <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-0.5 rounded">{service.category}</span>}
+                <Textarea value={service.description ?? ""} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, description: e.target.value } : s))} />
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <select className="rounded-lg border border-input bg-background px-3 py-2 text-sm" value={service.icon ?? "Code"} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, icon: e.target.value } : s))}>
+                    {ICONS.map((i) => <option key={i} value={i}>{i}</option>)}
+                  </select>
+                  <Input value={(service.features ?? []).join(", ")} onChange={(e) => setServices(services.map((s) => s.id === service.id ? { ...s, features: e.target.value.split(",").map((f) => f.trim()) } : s))} placeholder="Fonctionnalités (séparées par des virgules)" />
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleSave(service)}><Save className="h-4 w-4" /> Enregistrer</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Annuler</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-heading font-semibold text-foreground">{service.title}</span>
+                    <span className="text-xs text-muted-foreground">({service.icon})</span>
+                    {service.category && <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-0.5 rounded">{service.category}</span>}
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate">{service.description}</p>
+                  {service.features && service.features.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {service.features.map((f) => (
+                        <span key={f} className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">{f}</span>
+                      ))}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{service.description}</p>
-                    {service.features && service.features.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {service.features.map((f) => (
-                          <span key={f} className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">{f}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button size="icon" variant="ghost" onClick={() => toggleActive(service)}>
-                      {service.is_active ? "🟢" : "🔴"}
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => setEditingId(service.id)}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDelete(service.id)} className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                <div className="flex gap-1 shrink-0">
+                  <Button size="icon" variant="ghost" onClick={() => toggleActive(service)}>
+                    {service.is_active ? "🟢" : "🔴"}
+                  </Button>
+                  <Button size="icon" variant="ghost" onClick={() => setEditingId(service.id)}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="ghost" onClick={() => handleDelete(service.id)} className="text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
@@ -33,27 +32,14 @@ const ImageUpload = ({ value, onChange, folder = "general", label = "Image" }: I
     }
 
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
 
-    const { error } = await supabase.storage.from("media").upload(fileName, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-    if (error) {
-      toast({ title: "Erreur lors de l'upload", description: error.message, variant: "destructive" });
-      setUploading(false);
-      return;
-    }
-
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
-    const publicUrl = urlData.publicUrl;
-
-    setPreview(publicUrl);
-    onChange(publicUrl);
+    // Mock: create a local object URL for preview
+    // When backend is connected, replace with: api.post("/upload", formData)
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+    onChange(objectUrl);
     setUploading(false);
-    toast({ title: "Image uploadée avec succès" });
+    toast({ title: "Image chargée (mode local)" });
   };
 
   const handleRemove = () => {

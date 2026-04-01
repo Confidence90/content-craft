@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Mail } from "lucide-react";
+import { Lock, User } from "lucide-react";
 import { Navigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const { signIn, isAdmin, loading, user } = useAuth();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -19,7 +19,7 @@ const AdminLogin = () => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(identifier, password);
     if (error) {
       setError("Identifiants invalides");
     }
@@ -46,17 +46,17 @@ const AdminLogin = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Email ou Nom d'utilisateur</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-10" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@exemple.com" required />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input className="pl-10" type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="admin@exemple.com ou admin" required autoComplete="username" />
               </div>
             </div>
             <div>
               <label className="text-sm font-medium text-foreground mb-1.5 block">Mot de passe</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-10" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+                <Input className="pl-10" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" />
               </div>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
