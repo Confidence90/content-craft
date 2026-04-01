@@ -1,37 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Trash2, Edit2, GripVertical, ChevronDown, ChevronUp, Eye, EyeOff, Image, Type, Video, BarChart3, Quote, Users, ListChecks, MousePointerClick, CreditCard, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/admin/ImageUpload";
-
-interface ContentBlock {
-  id: string;
-  section_id: string;
-  block_type: string;
-  content_fr: string | null;
-  content_en: string | null;
-  media_url: string | null;
-  metadata: Record<string, any>;
-  sort_order: number;
-  is_visible: boolean;
-}
-
-interface PageSection {
-  id: string;
-  page: string;
-  section_key: string;
-  title_fr: string | null;
-  title_en: string | null;
-  subtitle_fr: string | null;
-  subtitle_en: string | null;
-  sort_order: number;
-  is_visible: boolean;
-  bg_variant: string;
-  blocks: ContentBlock[];
-}
+import { getPageSections } from "@/data/mockData";
+import { ContentBlock, PageSection } from "@/hooks/usePageContent";
 
 const PAGES = [
   { key: "home", label: "Accueil" },
@@ -55,8 +30,7 @@ const BLOCK_TYPES = [
 
 const AdminPageBuilder = () => {
   const { toast } = useToast();
-  const [sections, setSections] = useState<PageSection[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [sections, setSections] = useState<PageSection[]>(() => getPageSections("home"));
   const [selectedPage, setSelectedPage] = useState("home");
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [editingBlock, setEditingBlock] = useState<string | null>(null);
@@ -65,35 +39,17 @@ const AdminPageBuilder = () => {
   const [newSection, setNewSection] = useState({ section_key: "", title_fr: "", title_en: "", subtitle_fr: "", subtitle_en: "", bg_variant: "default" });
   const [newBlock, setNewBlock] = useState<Partial<ContentBlock>>({ block_type: "text", content_fr: "", content_en: "", media_url: "", metadata: {}, sort_order: 0 });
 
-  const fetchSections = useCallback(async () => {
-    setLoading(true);
-    const { data: sectionData } = await supabase
-      .from("page_sections")
-      .select("*")
-      .eq("page", selectedPage)
-      .order("sort_order");
+  const loadPage = (page: string) => {
+    setSelectedPage(page);
+    setSections(getPageSections(page));
+    setExpandedSection(null);
+  };
 
-    if (!sectionData) { setSections([]); setLoading(false); return; }
-
-    const ids = sectionData.map((s: any) => s.id);
-    const { data: blockData } = ids.length > 0
-      ? await supabase.from("content_blocks").select("*").in("section_id", ids).order("sort_order")
-      : { data: [] };
-
-    const result: PageSection[] = sectionData.map((s: any) => ({
-      ...s,
-      blocks: (blockData || []).filter((b: any) => b.section_id === s.id).map((b: any) => ({ ...b, metadata: b.metadata || {} })),
-    }));
-    setSections(result);
-    setLoading(false);
-  }, [selectedPage]);
-
-  useEffect(() => { fetchSections(); }, [fetchSections]);
-
-  const handleAddSection = async () => {
+  const handleAddSection = () => {
     if (!newSection.section_key) { toast({ title: "Clé de section requise", variant: "destructive" }); return; }
     const maxOrder = sections.length > 0 ? Math.max(...sections.map(s => s.sort_order)) + 1 : 0;
-    const { error } = await supabase.from("page_sections").insert({
+    const s: PageSection = {
+      id: "sec-" + Date.now(),
       page: selectedPage,
       section_key: newSection.section_key,
       title_fr: newSection.title_fr || null,
@@ -102,93 +58,90 @@ const AdminPageBuilder = () => {
       subtitle_en: newSection.subtitle_en || null,
       bg_variant: newSection.bg_variant,
       sort_order: maxOrder,
-    });
-    if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
+      is_visible: true,
+      blocks: [],
+    };
+    setSections(prev => [...prev, s]);
     toast({ title: "Section ajoutée" });
     setShowAddSection(false);
     setNewSection({ section_key: "", title_fr: "", title_en: "", subtitle_fr: "", subtitle_en: "", bg_variant: "default" });
-    fetchSections();
   };
 
-  const handleDeleteSection = async (id: string) => {
-    await supabase.from("page_sections").delete().eq("id", id);
+  const handleDeleteSection = (id: string) => {
+    setSections(prev => prev.filter(s => s.id !== id));
     toast({ title: "Section supprimée" });
-    fetchSections();
   };
 
-  const handleUpdateSection = async (section: PageSection) => {
-    const { error } = await supabase.from("page_sections").update({
-      title_fr: section.title_fr, title_en: section.title_en,
-      subtitle_fr: section.subtitle_fr, subtitle_en: section.subtitle_en,
-      is_visible: section.is_visible, bg_variant: section.bg_variant,
-    }).eq("id", section.id);
-    if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
+  const handleUpdateSection = (section: PageSection) => {
+    setSections(prev => prev.map(s => s.id === section.id ? section : s));
     toast({ title: "Section mise à jour" });
-    fetchSections();
   };
 
-  const handleMoveSectionOrder = async (id: string, direction: "up" | "down") => {
+  const handleMoveSectionOrder = (id: string, direction: "up" | "down") => {
     const idx = sections.findIndex(s => s.id === id);
     if ((direction === "up" && idx === 0) || (direction === "down" && idx === sections.length - 1)) return;
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    const a = sections[idx], b = sections[swapIdx];
-    await Promise.all([
-      supabase.from("page_sections").update({ sort_order: b.sort_order }).eq("id", a.id),
-      supabase.from("page_sections").update({ sort_order: a.sort_order }).eq("id", b.id),
-    ]);
-    fetchSections();
+    const newSections = [...sections];
+    const tempOrder = newSections[idx].sort_order;
+    newSections[idx].sort_order = newSections[swapIdx].sort_order;
+    newSections[swapIdx].sort_order = tempOrder;
+    [newSections[idx], newSections[swapIdx]] = [newSections[swapIdx], newSections[idx]];
+    setSections(newSections);
   };
 
-  const handleAddBlock = async (sectionId: string) => {
-    const section = sections.find(s => s.id === sectionId);
-    const maxOrder = section && section.blocks.length > 0 ? Math.max(...section.blocks.map(b => b.sort_order)) + 1 : 0;
-    const { error } = await supabase.from("content_blocks").insert({
+  const handleAddBlock = (sectionId: string) => {
+    const block: ContentBlock = {
+      id: "blk-" + Date.now(),
       section_id: sectionId,
       block_type: newBlock.block_type || "text",
       content_fr: newBlock.content_fr || null,
       content_en: newBlock.content_en || null,
       media_url: newBlock.media_url || null,
       metadata: newBlock.metadata || {},
-      sort_order: maxOrder,
-    });
-    if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
+      sort_order: 0,
+      is_visible: true,
+    };
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const maxOrder = s.blocks.length > 0 ? Math.max(...s.blocks.map(b => b.sort_order)) + 1 : 0;
+      block.sort_order = maxOrder;
+      return { ...s, blocks: [...s.blocks, block] };
+    }));
     toast({ title: "Bloc ajouté" });
     setShowAddBlock(null);
     setNewBlock({ block_type: "text", content_fr: "", content_en: "", media_url: "", metadata: {}, sort_order: 0 });
-    fetchSections();
   };
 
-  const handleUpdateBlock = async (block: ContentBlock) => {
-    const { error } = await supabase.from("content_blocks").update({
-      content_fr: block.content_fr, content_en: block.content_en,
-      media_url: block.media_url, metadata: block.metadata,
-      is_visible: block.is_visible, block_type: block.block_type,
-    }).eq("id", block.id);
-    if (error) { toast({ title: "Erreur", variant: "destructive" }); return; }
+  const handleUpdateBlock = (block: ContentBlock) => {
+    setSections(prev => prev.map(s => ({
+      ...s,
+      blocks: s.blocks.map(b => b.id === block.id ? block : b),
+    })));
     toast({ title: "Bloc mis à jour" });
     setEditingBlock(null);
-    fetchSections();
   };
 
-  const handleDeleteBlock = async (id: string) => {
-    await supabase.from("content_blocks").delete().eq("id", id);
+  const handleDeleteBlock = (id: string) => {
+    setSections(prev => prev.map(s => ({
+      ...s,
+      blocks: s.blocks.filter(b => b.id !== id),
+    })));
     toast({ title: "Bloc supprimé" });
-    fetchSections();
   };
 
-  const handleMoveBlock = async (sectionId: string, blockId: string, direction: "up" | "down") => {
-    const section = sections.find(s => s.id === sectionId);
-    if (!section) return;
-    const blocks = [...section.blocks].sort((a, b) => a.sort_order - b.sort_order);
-    const idx = blocks.findIndex(b => b.id === blockId);
-    if ((direction === "up" && idx === 0) || (direction === "down" && idx === blocks.length - 1)) return;
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    const a = blocks[idx], b = blocks[swapIdx];
-    await Promise.all([
-      supabase.from("content_blocks").update({ sort_order: b.sort_order }).eq("id", a.id),
-      supabase.from("content_blocks").update({ sort_order: a.sort_order }).eq("id", b.id),
-    ]);
-    fetchSections();
+  const handleMoveBlock = (sectionId: string, blockId: string, direction: "up" | "down") => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const blocks = [...s.blocks].sort((a, b) => a.sort_order - b.sort_order);
+      const idx = blocks.findIndex(b => b.id === blockId);
+      if ((direction === "up" && idx === 0) || (direction === "down" && idx === blocks.length - 1)) return s;
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+      const tempOrder = blocks[idx].sort_order;
+      blocks[idx].sort_order = blocks[swapIdx].sort_order;
+      blocks[swapIdx].sort_order = tempOrder;
+      [blocks[idx], blocks[swapIdx]] = [blocks[swapIdx], blocks[idx]];
+      return { ...s, blocks };
+    }));
   };
 
   const updateLocalBlock = (blockId: string, updates: Partial<ContentBlock>) => {
@@ -306,7 +259,7 @@ const AdminPageBuilder = () => {
         {PAGES.map((p) => (
           <button
             key={p.key}
-            onClick={() => { setSelectedPage(p.key); setExpandedSection(null); }}
+            onClick={() => loadPage(p.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedPage === p.key ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground hover:text-foreground"
             }`}
@@ -344,9 +297,7 @@ const AdminPageBuilder = () => {
       )}
 
       {/* Sections list */}
-      {loading ? (
-        <p className="text-muted-foreground">Chargement...</p>
-      ) : sections.length === 0 ? (
+      {sections.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <p>Aucune section pour cette page. Cliquez sur « Ajouter une Section ».</p>
         </div>
@@ -387,7 +338,6 @@ const AdminPageBuilder = () => {
               {/* Expanded section editor */}
               {expandedSection === section.id && (
                 <div className="px-5 py-4 space-y-4 bg-muted/30">
-                  {/* Section fields */}
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-muted-foreground">Titre FR</label>
@@ -419,7 +369,6 @@ const AdminPageBuilder = () => {
                       </Button>
                     </div>
 
-                    {/* Add block form */}
                     {showAddBlock === section.id && (
                       <div className="bg-background rounded-lg p-4 border border-border mb-3 space-y-3">
                         <div className="grid sm:grid-cols-2 gap-3">
@@ -494,7 +443,7 @@ const AdminPageBuilder = () => {
                                 {renderMetadataEditor(block)}
                                 <div className="flex gap-2">
                                   <Button size="sm" onClick={() => handleUpdateBlock(block)}><Save className="h-4 w-4" /> Sauvegarder</Button>
-                                  <Button size="sm" variant="ghost" onClick={() => { setEditingBlock(null); fetchSections(); }}>Annuler</Button>
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingBlock(null)}>Annuler</Button>
                                 </div>
                               </div>
                             )}

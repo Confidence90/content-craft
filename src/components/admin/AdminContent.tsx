@@ -1,73 +1,50 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/admin/ImageUpload";
-
-interface ContentItem {
-  id: string;
-  page: string;
-  section: string;
-  content_key: string;
-  content_value: string | null;
-  content_type: string;
-  sort_order: number | null;
-}
+import { mockSiteContent, MockSiteContent } from "@/data/mockData";
 
 const PAGES = ["home", "presentation", "services", "solutions"];
 
 const AdminContent = () => {
   const { toast } = useToast();
-  const [items, setItems] = useState<ContentItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<MockSiteContent[]>(mockSiteContent);
   const [selectedPage, setSelectedPage] = useState("home");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newItem, setNewItem] = useState({ page: "home", section: "", content_key: "", content_value: "", content_type: "text" });
 
-  const fetchContent = async () => {
-    const { data } = await supabase.from("site_content").select("*").eq("page", selectedPage).order("sort_order");
-    setItems((data as ContentItem[]) ?? []);
-    setLoading(false);
-  };
+  const filteredItems = items.filter(i => i.page === selectedPage);
 
-  useEffect(() => { fetchContent(); }, [selectedPage]);
-
-  const handleSave = async (item: ContentItem) => {
-    const { error } = await supabase.from("site_content").update({
-      content_value: item.content_value,
-      content_key: item.content_key,
-      section: item.section,
-    }).eq("id", item.id);
-    if (error) { toast({ title: "Erreur lors de la sauvegarde", variant: "destructive" }); return; }
+  const handleSave = (item: MockSiteContent) => {
+    setItems(prev => prev.map(i => i.id === item.id ? item : i));
     toast({ title: "Contenu mis à jour" });
     setEditingId(null);
-    fetchContent();
   };
 
-  const handleAdd = async () => {
+  const handleAdd = () => {
     if (!newItem.section || !newItem.content_key) { toast({ title: "Section et clé requises", variant: "destructive" }); return; }
-    const { error } = await supabase.from("site_content").insert({
+    const sc: MockSiteContent = {
+      id: "sc-" + Date.now(),
       page: newItem.page,
       section: newItem.section,
       content_key: newItem.content_key,
       content_value: newItem.content_value,
       content_type: newItem.content_type,
-    });
-    if (error) { toast({ title: "Erreur lors de l'ajout", variant: "destructive" }); return; }
+      sort_order: items.length,
+    };
+    setItems(prev => [...prev, sc]);
     toast({ title: "Contenu ajouté" });
     setShowAdd(false);
     setNewItem({ page: selectedPage, section: "", content_key: "", content_value: "", content_type: "text" });
-    fetchContent();
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("site_content").delete().eq("id", id);
+  const handleDelete = (id: string) => {
+    setItems(prev => prev.filter(i => i.id !== id));
     toast({ title: "Contenu supprimé" });
-    fetchContent();
   };
 
   return (
@@ -79,7 +56,6 @@ const AdminContent = () => {
         </Button>
       </div>
 
-      {/* Page tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {PAGES.map((p) => (
           <button
@@ -94,7 +70,6 @@ const AdminContent = () => {
         ))}
       </div>
 
-      {/* Add form */}
       {showAdd && (
         <div className="bg-card rounded-xl p-6 shadow-card border border-border mb-6 space-y-4">
           <h3 className="font-heading font-semibold text-foreground">Nouvel Élément de Contenu</h3>
@@ -128,16 +103,13 @@ const AdminContent = () => {
         </div>
       )}
 
-      {/* Content list */}
-      {loading ? (
-        <p className="text-muted-foreground">Chargement...</p>
-      ) : items.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <p>Aucun contenu pour cette page. Cliquez sur « Ajouter du Contenu » pour commencer.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map((item) => (
+          {filteredItems.map((item) => (
             <div key={item.id} className="bg-card rounded-xl p-5 shadow-card border border-border">
               {editingId === item.id ? (
                 <div className="space-y-3">
@@ -157,7 +129,7 @@ const AdminContent = () => {
                   )}
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleSave(item)}><Save className="h-4 w-4" /> Enregistrer</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); fetchContent(); }}>Annuler</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Annuler</Button>
                   </div>
                 </div>
               ) : (
