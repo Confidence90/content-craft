@@ -1,8 +1,19 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { mockAdminUser, MockUser } from "@/data/mockData";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import api from "@/services/api";
+
+export interface User {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  username?: string;
+  telephone?: string;
+  role: string;
+  photo_profil?: string;
+}
 
 interface AuthContextType {
-  user: MockUser | null;
+  user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
@@ -10,12 +21,13 @@ interface AuthContextType {
   loading: boolean;
   signIn: (identifier: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  fetchCurrentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,39 +35,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = !!user && !!accessToken;
   const isAdmin = user?.role === "ADMIN";
 
+  const fetchCurrentUser = useCallback(async () => {
+    try {
+      const { data } = await api.get("/auth/me");
+      setUser(data.user || data);
+    } catch {
+      // Token invalid — clean up
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+      setAccessToken(null);
+      setRefreshToken(null);
+    }
+  }, []);
+
   // Restore session on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("accessToken");
     const storedRefresh = localStorage.getItem("refreshToken");
     if (storedToken) {
-      // In mock mode, restore the admin user
-      setUser(mockAdminUser);
       setAccessToken(storedToken);
       setRefreshToken(storedRefresh);
+      fetchCurrentUser().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  }, [fetchCurrentUser]);
 
   const signIn = async (identifier: string, password: string): Promise<{ error: Error | null }> => {
-    // Mock authentication — accepts admin@techcorp.com / admin / Admin123!
-    // When backend is connected, replace with: api.post("/connexion", { identifier, password })
-    if (
-      (identifier === mockAdminUser.email || identifier === mockAdminUser.username) &&
-      password === "Admin123!"
-    ) {
-      const mockAccessToken = "mock-access-token-" + Date.now();
-      const mockRefreshToken = "mock-refresh-token-" + Date.now();
-      localStorage.setItem("accessToken", mockAccessToken);
-      localStorage.setItem("refreshToken", mockRefreshToken);
-      setAccessToken(mockAccessToken);
-      setRefreshToken(mockRefreshToken);
-      setUser(mockAdminUser);
+    try {
+      const { data } = await api.post("/auth/connexion", { identifier, password });
+      
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+      setUser(data.user);
+      
       return { error: null };
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.response?.data?.error || "Identifiants invalides";
+      return { error: new Error(message) };
     }
-    return { error: new Error("Identifiants invalides") };
   };
 
   const signOut = async () => {
+    try {
+      await api.post("/auth/deconnexion");
+    } catch {
+      // Ignore logout API errors
+    }
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     setUser(null);
@@ -64,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, refreshToken, isAuthenticated, isAdmin, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, accessToken, refreshToken, isAuthenticated, isAdmin, loading, signIn, signOut, fetchCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
