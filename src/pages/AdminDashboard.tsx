@@ -1,19 +1,34 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
-import { LayoutDashboard, FileText, Settings2, MessageSquare, LogOut, Menu, X, ChevronRight, Blocks } from "lucide-react";
+import { LayoutDashboard, FileText, Settings2, MessageSquare, LogOut, Menu, X, ChevronRight, Blocks , Bell,Users} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AdminPageBuilder from "@/components/admin/AdminPageBuilder";
 import AdminServices from "@/components/admin/AdminServices";
 import AdminMessages from "@/components/admin/AdminMessages";
 import AdminOverview from "@/components/admin/AdminOverview";
-
+import AdminContacts       from "@/components/admin/AdminContacts";
+import AdminNotifications from "@/components/admin/AdminNotifications"
+import { Quote } from "lucide-react"; //
+import AdminTemoignages from "@/components/admin/AdminTemoignages";
 const tabs = [
   { id: "overview", label: "Aperçu", icon: LayoutDashboard },
   { id: "builder", label: "Pages", icon: Blocks },
   { id: "services", label: "Services", icon: Settings2 },
   { id: "messages", label: "Messages", icon: MessageSquare },
+  { id: "contacts",       label: "Contacts",        icon: Users },
+  { id: "notifications",  label: "Notifications",  icon: Bell }, 
+  { id: "temoignages", label: "Témoignages", icon: Quote },
 ];
+const tabLabels: Record<string, string> = {
+  overview:      "Aperçu",
+  builder:       "Pages",
+  services:      "Services",
+  messages:      "Messages",
+  contacts:      "Contacts",
+  notifications: "Notifications",
+  temoignages: "Témoignages",
+};
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -23,7 +38,7 @@ const AdminDashboard = () => {
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><p className="text-muted-foreground">Chargement...</p></div>;
   if (!user || !isAdmin) return <Navigate to="/admin/login" replace />;
 
-  const tabLabels: Record<string, string> = { overview: "Aperçu", builder: "Pages", services: "Services", messages: "Messages" };
+  //const tabLabels: Record<string, string> = { overview: "Aperçu", builder: "Pages", services: "Services", messages: "Messages" };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -84,6 +99,9 @@ const AdminDashboard = () => {
           {activeTab === "builder" && <AdminPageBuilder />}
           {activeTab === "services" && <AdminServices />}
           {activeTab === "messages" && <AdminMessages />}
+          {activeTab === "contacts"      && <AdminContacts />}
+          {activeTab === "notifications" && <AdminNotifications />}
+          {activeTab === "temoignages" && <AdminTemoignages />}
         </main>
       </div>
     </div>

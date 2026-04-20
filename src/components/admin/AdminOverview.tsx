@@ -1,23 +1,31 @@
 import { FileText, Settings2, MessageSquare, Eye } from "lucide-react";
-import { mockSiteContent, mockServices, mockMessages } from "@/data/mockData";
+import { useContacts } from "@/hooks/useContacts";
+import { useServices } from "@/hooks/useServices";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AdminOverviewProps {
   onNavigate: (tab: string) => void;
 }
 
 const AdminOverview = ({ onNavigate }: AdminOverviewProps) => {
+  const { user } = useAuth();
+  const { data: contacts } = useContacts();
+  const { data: services } = useServices();
+  const { data: notifications } = useNotifications(user?.id ?? 0);
+
   const stats = {
-    content: mockSiteContent.length,
-    services: mockServices.length,
-    messages: mockMessages.length,
-    unread: mockMessages.filter(m => !m.is_read).length,
+    contacts: contacts?.total ?? 0,
+    services: services?.length ?? 0,
+    notifications: notifications?.length ?? 0,
+    unread: notifications?.filter((n) => !n.lue).length ?? 0,
   };
 
   const cards = [
-    { label: "Éléments de Contenu", value: stats.content, icon: FileText, tab: "content", color: "text-blue-500" },
-    { label: "Services", value: stats.services, icon: Settings2, tab: "services", color: "text-accent" },
-    { label: "Messages", value: stats.messages, icon: MessageSquare, tab: "messages", color: "text-green-500" },
-    { label: "Messages Non Lus", value: stats.unread, icon: Eye, tab: "messages", color: "text-orange-500" },
+    { label: "Contacts reçus",      value: stats.contacts,      icon: FileText,    tab: "contacts",       color: "text-blue-500" },
+    { label: "Services",            value: stats.services,      icon: Settings2,   tab: "services",       color: "text-accent" },
+    { label: "Notifications",       value: stats.notifications, icon: MessageSquare, tab: "notifications", color: "text-green-500" },
+    { label: "Non lues",            value: stats.unread,        icon: Eye,         tab: "notifications",  color: "text-orange-500" },
   ];
 
   return (

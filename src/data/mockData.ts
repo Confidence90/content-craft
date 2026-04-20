@@ -150,9 +150,9 @@ const mockSections: PageSection[] = [
     title_fr: null, title_en: null, subtitle_fr: null, subtitle_en: null,
     sort_order: 1, is_visible: true, bg_variant: "default",
     blocks: [
-      { id: "contact-phone", section_id: "contact-info", block_type: "contact_info", content_fr: "+33 1 23 45 67 89", content_en: "+33 1 23 45 67 89", media_url: null, metadata: { label_fr: "Téléphone", label_en: "Phone", icon: "Phone" }, sort_order: 0, is_visible: true },
-      { id: "contact-email", section_id: "contact-info", block_type: "contact_info", content_fr: "contact@techcorp.com", content_en: "contact@techcorp.com", media_url: null, metadata: { label_fr: "Email", label_en: "Email", icon: "Mail" }, sort_order: 1, is_visible: true },
-      { id: "contact-address", section_id: "contact-info", block_type: "contact_info", content_fr: "123 Boulevard de l'Innovation, 75001 Paris", content_en: "123 Innovation Boulevard, 75001 Paris", media_url: null, metadata: { label_fr: "Adresse", label_en: "Address", icon: "MapPin" }, sort_order: 2, is_visible: true },
+      { id: "contact-phone", section_id: "contact-info", block_type: "contact_info", content_fr: "+223 90 11 70 51", content_en: "+223 90 11 70 51", media_url: null, metadata: { label_fr: "Téléphone", label_en: "Phone", icon: "Phone" }, sort_order: 0, is_visible: true },
+      { id: "contact-email", section_id: "contact-info", block_type: "contact_info", content_fr: "confidenceuche314@gmail.com", content_en: "confidenceuche314@gmail.com", media_url: null, metadata: { label_fr: "Email", label_en: "Email", icon: "Mail" }, sort_order: 1, is_visible: true },
+      { id: "contact-address", section_id: "contact-info", block_type: "contact_info", content_fr: "AUF/FST Badalabougou, Bamako", content_en: "123 Innovation Boulevard, 75001 Paris", media_url: null, metadata: { label_fr: "Adresse", label_en: "Address", icon: "MapPin" }, sort_order: 2, is_visible: true },
     ],
   },
 ];

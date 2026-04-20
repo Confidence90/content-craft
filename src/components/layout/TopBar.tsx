@@ -27,11 +27,11 @@ const TopBar = () => {
         <div className="hidden sm:flex items-center gap-4 text-primary-foreground/80">
           <a href="tel:+33123456789" className="flex items-center gap-1.5 hover:text-accent transition-colors">
             <Phone className="h-3 w-3" />
-            <span>+33 1 23 45 67 89</span>
+            <span>+223 90 11 70 51</span>
           </a>
-          <a href="mailto:contact@techcorp.com" className="flex items-center gap-1.5 hover:text-accent transition-colors">
+          <a href="mailto:confidenceuche314@gmail.com" className="flex items-center gap-1.5 hover:text-accent transition-colors">
             <Mail className="h-3 w-3" />
-            <span>contact@techcorp.com</span>
+            <span>confidenceuche314@gmail.com</span>
           </a>
         </div>
       </div>

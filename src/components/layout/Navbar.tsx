@@ -25,6 +25,7 @@ const Navbar = () => {
     { label: lang === "en" ? "About" : "Présentation", href: "/presentation" },
     { label: "Services", href: "/services", children: services },
     { label: "Solutions", href: "/solutions" },
+    { label: lang === "en" ? "Testimonials" : "Témoignages", href: "/temoignages" },
     { label: "Contact", href: "/contact" },
   ];
 

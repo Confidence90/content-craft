@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import api from "@/services/api";
 
 interface ImageUploadProps {
   value: string;
@@ -25,21 +26,27 @@ const ImageUpload = ({ value, onChange, folder = "general", label = "Image" }: I
       toast({ title: "Seules les images sont autorisées", variant: "destructive" });
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       toast({ title: "L'image ne doit pas dépasser 5 Mo", variant: "destructive" });
       return;
     }
 
     setUploading(true);
-
-    // Mock: create a local object URL for preview
-    // When backend is connected, replace with: api.post("/upload", formData)
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    onChange(objectUrl);
-    setUploading(false);
-    toast({ title: "Image chargée (mode local)" });
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+      const { data } = await api.post(`/upload?folder=${folder}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const url: string = data.url ?? data.path ?? "";
+      setPreview(url);
+      onChange(url);
+      toast({ title: "Image uploadée" });
+    } catch {
+      toast({ title: "Erreur lors de l'upload", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRemove = () => {
@@ -51,7 +58,7 @@ const ImageUpload = ({ value, onChange, folder = "general", label = "Image" }: I
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-foreground">{label}</label>
-      
+
       {preview ? (
         <div className="relative group rounded-lg overflow-hidden border border-border bg-muted">
           <img src={preview} alt="Aperçu" className="w-full h-40 object-cover" />
@@ -81,21 +88,12 @@ const ImageUpload = ({ value, onChange, folder = "general", label = "Image" }: I
         </button>
       )}
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleUpload}
-      />
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
 
       <Input
         placeholder="Ou collez une URL d'image..."
         value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-          setPreview(e.target.value);
-        }}
+        onChange={(e) => { onChange(e.target.value); setPreview(e.target.value); }}
         className="text-xs"
       />
     </div>

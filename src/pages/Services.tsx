@@ -1,31 +1,37 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { Globe, Smartphone, Monitor, Server, Shield, Code, Zap, BarChart3, Cloud, Lock, Layers, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { mockServices, MockService } from "@/data/mockData";
-import { usePageContent } from "@/hooks/usePageContent";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useServices } from "@/hooks/useServices";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Globe, Smartphone, Monitor, Server, Shield, Code, Zap, BarChart3, Cloud, Lock, Layers, Cpu,
 };
 
 const Services = () => {
-  // Use mock data directly
-  const services = mockServices.filter(s => s.is_active);
-  const { loading: pageLoading, getSection } = usePageContent("services");
   const { lang } = useLanguage();
+  const { data: services = [], isLoading } = useServices();
+
+  if (isLoading) return <div className="container py-24 text-muted-foreground">Chargement...</div>;
 
   return (
     <div>
       <section className="bg-hero py-20">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">{lang === "en" ? "Our Expertise" : "Notre Expertise"}</p>
-            <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground mb-4">{lang === "en" ? "Services & Solutions" : "Services & Solutions"}</h1>
-            <p className="text-primary-foreground/60 text-lg">{lang === "en" ? "End-to-end digital services designed to transform your business." : "Des services numériques de bout en bout conçus pour transformer votre entreprise."}</p>
+            <p className="text-accent font-medium text-sm uppercase tracking-wider mb-3">
+              {lang === "en" ? "Our Expertise" : "Notre Expertise"}
+            </p>
+            <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground mb-4">
+              Services & Solutions
+            </h1>
+            <p className="text-primary-foreground/60 text-lg">
+              {lang === "en"
+                ? "End-to-end digital services designed to transform your business."
+                : "Des services numériques de bout en bout conçus pour transformer votre entreprise."}
+            </p>
           </motion.div>
         </div>
       </section>
@@ -33,11 +39,10 @@ const Services = () => {
       <section className="py-24 bg-background">
         <div className="container space-y-8">
           {services.map((service, i) => {
-            const Icon = iconMap[service.icon ?? "Code"] ?? Code;
+            const Icon = iconMap["Code"] ?? Code; // pas de champ icon dans Service backend
             return (
               <motion.div
                 key={service.id}
-                id={service.category ?? undefined}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -49,20 +54,22 @@ const Services = () => {
                     <Icon className="h-8 w-8 text-accent" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-2xl font-heading font-bold text-foreground mb-3">{service.title}</h2>
+                    <h2 className="text-2xl font-heading font-bold text-foreground mb-3">{service.nom}</h2>
                     <p className="text-muted-foreground leading-relaxed mb-6">{service.description}</p>
-                    {service.features && service.features.length > 0 && (
-                      <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                        {service.features.map((f) => (
-                          <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 text-accent shrink-0" />
-                            {f}
-                          </div>
+                    {service.technologie && (
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {service.technologie.split(",").map((t) => (
+                          <span key={t} className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full">
+                            {t.trim()}
+                          </span>
                         ))}
                       </div>
                     )}
                     <Button asChild size="sm" variant="outline">
-                      <Link to="/contact">{lang === "en" ? "Request a Quote" : "Demander un Devis"} <ArrowRight className="h-3.5 w-3.5" /></Link>
+                      <Link to="/contact">
+                        {lang === "en" ? "Request a Quote" : "Demander un Devis"}{" "}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
                     </Button>
                   </div>
                 </div>

@@ -1,12 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Save, Trash2, Edit2, GripVertical, ChevronDown, ChevronUp, Eye, EyeOff, Image, Type, Video, BarChart3, Quote, Users, ListChecks, MousePointerClick, CreditCard, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { getPageSections } from "@/data/mockData";
 import { ContentBlock, PageSection } from "@/hooks/usePageContent";
+import api from "@/services/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PAGES = [
   { key: "home", label: "Accueil" },
@@ -30,7 +31,7 @@ const BLOCK_TYPES = [
 
 const AdminPageBuilder = () => {
   const { toast } = useToast();
-  const [sections, setSections] = useState<PageSection[]>(() => getPageSections("home"));
+  const [sections, setSections] = useState<PageSection[]>([]);
   const [selectedPage, setSelectedPage] = useState("home");
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [editingBlock, setEditingBlock] = useState<string | null>(null);
@@ -38,96 +39,104 @@ const AdminPageBuilder = () => {
   const [showAddBlock, setShowAddBlock] = useState<string | null>(null);
   const [newSection, setNewSection] = useState({ section_key: "", title_fr: "", title_en: "", subtitle_fr: "", subtitle_en: "", bg_variant: "default" });
   const [newBlock, setNewBlock] = useState<Partial<ContentBlock>>({ block_type: "text", content_fr: "", content_en: "", media_url: "", metadata: {}, sort_order: 0 });
+  const [loadingPage, setLoadingPage] = useState(false);
+  const qc = useQueryClient();
+  const loadPage = async (page: string) => {
+  setSelectedPage(page);
+  setExpandedSection(null);
+  setLoadingPage(true);
+  try {
+    const { data } = await api.get<PageSection[]>(`/page-sections/admin?page=${page}`);
+    setSections(data);
+  } catch {
+    setSections([]);
+  } finally {
+    setLoadingPage(false);
+  }
+};
+useEffect(() => { loadPage("home"); }, []);
+  const handleAddSection = async () => {
+  if (!newSection.section_key) {
+    toast({ title: "Clé requise", variant: "destructive" });
+    return;
+  }
 
-  const loadPage = (page: string) => {
-    setSelectedPage(page);
-    setSections(getPageSections(page));
-    setExpandedSection(null);
-  };
-
-  const handleAddSection = () => {
-    if (!newSection.section_key) { toast({ title: "Clé de section requise", variant: "destructive" }); return; }
-    const maxOrder = sections.length > 0 ? Math.max(...sections.map(s => s.sort_order)) + 1 : 0;
-    const s: PageSection = {
-      id: "sec-" + Date.now(),
+  try {
+    const { data } = await api.post("/page-sections", {
+      ...newSection,
       page: selectedPage,
-      section_key: newSection.section_key,
-      title_fr: newSection.title_fr || null,
-      title_en: newSection.title_en || null,
-      subtitle_fr: newSection.subtitle_fr || null,
-      subtitle_en: newSection.subtitle_en || null,
-      bg_variant: newSection.bg_variant,
-      sort_order: maxOrder,
+      sort_order: sections.length,
       is_visible: true,
-      blocks: [],
-    };
-    setSections(prev => [...prev, s]);
+    });
+
+    setSections(prev => [...prev, { ...data, blocks: [] }]);
+
+    qc.invalidateQueries({ queryKey: ["page-sections"] });
+
     toast({ title: "Section ajoutée" });
+
     setShowAddSection(false);
-    setNewSection({ section_key: "", title_fr: "", title_en: "", subtitle_fr: "", subtitle_en: "", bg_variant: "default" });
-  };
 
-  const handleDeleteSection = (id: string) => {
-    setSections(prev => prev.filter(s => s.id !== id));
-    toast({ title: "Section supprimée" });
-  };
+    setNewSection({
+      section_key: "",
+      title_fr: "",
+      title_en: "",
+      subtitle_fr: "",
+      subtitle_en: "",
+      bg_variant: "default",
+    });
 
-  const handleUpdateSection = (section: PageSection) => {
-    setSections(prev => prev.map(s => s.id === section.id ? section : s));
-    toast({ title: "Section mise à jour" });
-  };
+  } catch {
+    toast({ title: "Erreur", variant: "destructive" });
+  }
+};
 
-  const handleMoveSectionOrder = (id: string, direction: "up" | "down") => {
-    const idx = sections.findIndex(s => s.id === id);
-    if ((direction === "up" && idx === 0) || (direction === "down" && idx === sections.length - 1)) return;
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    const newSections = [...sections];
-    const tempOrder = newSections[idx].sort_order;
-    newSections[idx].sort_order = newSections[swapIdx].sort_order;
-    newSections[swapIdx].sort_order = tempOrder;
-    [newSections[idx], newSections[swapIdx]] = [newSections[swapIdx], newSections[idx]];
-    setSections(newSections);
-  };
+const handleDeleteSection = async (id: string) => {
+  await api.delete(`/page-sections/${id}`);
+  setSections(prev => prev.filter(s => s.id !== id));
+  qc.invalidateQueries({ queryKey: ["page-sections"] });
+  toast({ title: "Section supprimée" });
+};
 
-  const handleAddBlock = (sectionId: string) => {
-    const block: ContentBlock = {
-      id: "blk-" + Date.now(),
-      section_id: sectionId,
-      block_type: newBlock.block_type || "text",
-      content_fr: newBlock.content_fr || null,
-      content_en: newBlock.content_en || null,
-      media_url: newBlock.media_url || null,
-      metadata: newBlock.metadata || {},
-      sort_order: 0,
-      is_visible: true,
-    };
-    setSections(prev => prev.map(s => {
-      if (s.id !== sectionId) return s;
-      const maxOrder = s.blocks.length > 0 ? Math.max(...s.blocks.map(b => b.sort_order)) + 1 : 0;
-      block.sort_order = maxOrder;
-      return { ...s, blocks: [...s.blocks, block] };
-    }));
-    toast({ title: "Bloc ajouté" });
-    setShowAddBlock(null);
-    setNewBlock({ block_type: "text", content_fr: "", content_en: "", media_url: "", metadata: {}, sort_order: 0 });
-  };
+const handleUpdateSection = async (section: PageSection) => {
+  await api.put(`/page-sections/${section.id}`, section);
+   qc.invalidateQueries({ queryKey: ["page-sections"] });
+  toast({ title: "Section mise à jour" });
+};
 
-  const handleUpdateBlock = (block: ContentBlock) => {
-    setSections(prev => prev.map(s => ({
-      ...s,
-      blocks: s.blocks.map(b => b.id === block.id ? block : b),
-    })));
-    toast({ title: "Bloc mis à jour" });
-    setEditingBlock(null);
-  };
+const handleAddBlock = async (sectionId: string) => {
+  const { data } = await api.post(`/page-sections/${sectionId}/blocks`, {
+    ...newBlock,
+    section_id: sectionId,
+  });
+  setSections(prev => prev.map(s =>
+    s.id === sectionId ? { ...s, blocks: [...s.blocks, data] } : s
+  ));
+   qc.invalidateQueries({ queryKey: ["page-sections"] });
+  toast({ title: "Bloc ajouté" });
+  setShowAddBlock(null);
+};
 
-  const handleDeleteBlock = (id: string) => {
-    setSections(prev => prev.map(s => ({
-      ...s,
-      blocks: s.blocks.filter(b => b.id !== id),
-    })));
-    toast({ title: "Bloc supprimé" });
-  };
+const handleUpdateBlock = async (block: ContentBlock) => {
+  await api.put(`/page-sections/blocks/${block.id}`, block);
+  setSections(prev => prev.map(s => ({
+    ...s,
+    blocks: s.blocks.map(b => b.id === block.id ? block : b),
+  })));
+   qc.invalidateQueries({ queryKey: ["page-sections"] });
+  toast({ title: "Bloc mis à jour" });
+  setEditingBlock(null);
+};
+
+const handleDeleteBlock = async (id: string) => {
+  await api.delete(`/page-sections/blocks/${id}`);
+  setSections(prev => prev.map(s => ({
+    ...s,
+    blocks: s.blocks.filter(b => b.id !== id),
+  })));
+   qc.invalidateQueries({ queryKey: ["page-sections"] });
+  toast({ title: "Bloc supprimé" });
+};
 
   const handleMoveBlock = (sectionId: string, blockId: string, direction: "up" | "down") => {
     setSections(prev => prev.map(s => {
@@ -244,6 +253,10 @@ const AdminPageBuilder = () => {
         return null;
     }
   };
+
+  function handleMoveSectionOrder(id: string, arg1: string): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <div>

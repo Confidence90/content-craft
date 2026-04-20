@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { getPageSections } from "@/data/mockData";
-
+import api from "@/services/api";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 export interface ContentBlock {
-  id: string;
-  section_id: string;
+  id: number;
+  section_id: number;
   block_type: string;
   content_fr: string | null;
   content_en: string | null;
@@ -14,7 +14,7 @@ export interface ContentBlock {
 }
 
 export interface PageSection {
-  id: string;
+  id: number;
   page: string;
   section_key: string;
   title_fr: string | null;
@@ -28,18 +28,13 @@ export interface PageSection {
 }
 
 export const usePageContent = (page: string) => {
-  const [sections, setSections] = useState<PageSection[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Mock: load from static data
-    // When backend is connected, replace with: api.get(`/page-sections?page=${page}`)
-    const data = getPageSections(page);
-    setSections(data);
-    setLoading(false);
-  }, [page]);
+  const { data: sections = [], isLoading: loading } = useQuery({
+    queryKey: ["page-sections", page],
+    queryFn: () =>
+      api.get<PageSection[]>(`/page-sections`, { params: { page } }).then((r) => r.data),
+    staleTime: 0,
+  });
 
   const getSection = (key: string) => sections.find((s) => s.section_key === key);
-
   return { sections, loading, getSection };
 };
